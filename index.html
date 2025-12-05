@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="A comprehensive study on Wallpaper Symmetry Group Learning comparing Standard Autoencoders and Beta Variational Autoencoders (β-VAE) with different beta values.">
+  <meta name="keywords" content="Autoencoder, β-VAE, VAE, Symmetry Learning, Wallpaper Groups, Disentanglement, Deep Learning, Latent Space">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autoencoder vs β-VAE for Wallpaper Symmetry Learning</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          Experiments
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="#standard-ae">
+            Standard Autoencoder (Best Reconstruction)
+          </a>
+          <a class="navbar-item" href="#beta-05">
+            β = 0.5 (Reconstruction Focus)
+          </a>
+          <a class="navbar-item" href="#beta-10">
+            β = 1.0 (Standard VAE)
+          </a>
+          <a class="navbar-item" href="#beta-40">
+            β = 4.0 (Disentanglement Focus)
+          </a>
+          <a class="navbar-item" href="#comparison">
+            Comparative Analysis
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Wallpaper Symmetry Group Learning: A Comparative Study of Standard Autoencoders and β-VAE</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              İsmail Efe Ataş<br>
+              <span class="author-block">
+               TED University<br>
+                Department of Computer Engineering<br>
+                <a href="mailto:efeatas@itu.edu.tr">iefeatas@gmail.com</a>
+              </span>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Research Project</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="./sources/standart_autoencoder/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- Dataset Link. -->
+              <span class="link-block">
+                <a href="https://zenodo.org/records/7384734"
+                   class="external-link button is-normal is-rounded is-dark" target="_blank">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Dataset (Zenodo)</span>
+                </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            This research presents a comprehensive comparative study between <strong>Standard Convolutional Autoencoders</strong> 
+            and <strong>Beta Variational Autoencoders (β-VAE)</strong> for the learning and analysis of 
+            <strong>17 wallpaper symmetry groups</strong>. Wallpaper groups represent all possible ways to repeat 
+            a pattern in two dimensions and have applications in crystallography, materials science, and computer graphics.
+          </p>
+          <p>
+            We compare <strong>four different model configurations</strong>: a deterministic Standard Autoencoder 
+            (no KL regularization), and three β-VAE variants with β values of 0.5, 1.0, and 4.0. This allows us 
+            to systematically investigate how probabilistic modeling and the strength of latent regularization 
+            affect reconstruction quality, latent space organization, and class separability.
+          </p>
+          <p>
+            Our experiments utilize the <strong><a href="https://zenodo.org/records/7384734" target="_blank">Symmetry Dataset</a></strong> 
+            (Guo & Agar, 2022) from Zenodo, comprising <strong>76,500 training samples</strong>, 
+            <strong>8,500 validation samples</strong>, and <strong>355 test samples</strong> across all 17 symmetry classes. 
+            Key findings reveal that the <strong>Standard Autoencoder achieves the best reconstruction quality</strong> 
+            (Test MSE: 0.061), while <strong>β-VAE with β=4.0 produces the most regularized latent space</strong> 
+            (KL Divergence: 2.64). The standard VAE (β=1.0) offers the most compact representations with 
+            64.47% PCA explained variance in just 2 dimensions.
+          </p>
+          <p>
+            We provide detailed analysis including t-SNE/PCA visualizations, latent space statistics, error distributions, 
+            class-wise reconstruction errors, and comprehensive training dynamics. Our findings offer practical guidance 
+            for selecting the appropriate model architecture based on specific application requirements.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Model Configuration. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Model Architectures & Configurations</h2>
+        <div class="content has-text-justified">
+          <p>
+            We evaluate two fundamental autoencoder paradigms: the <strong>deterministic Standard Autoencoder</strong> 
+            and the <strong>probabilistic Variational Autoencoder</strong>. Both use similar convolutional architectures 
+            but differ in their latent space formulation.
+          </p>
+          <div class="box">
+            <h4>Standard Autoencoder Loss:</h4>
+            <p style="text-align: center; font-size: 1.2em;">
+              <strong>L = MSE(x, x̂)</strong>
+            </p>
+            <h4>β-VAE Loss:</h4>
+            <p style="text-align: center; font-size: 1.2em;">
+              <strong>L = MSE(x, x̂) + β × KL(q(z|x) || N(0, I))</strong>
+            </p>
+          </div>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Standard AE</th>
+                <th>β-VAE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Model Type</td><td>Convolutional Autoencoder</td><td>Beta Variational Autoencoder</td></tr>
+              <tr><td>Input Size</td><td colspan="2">256×256×3 (RGB)</td></tr>
+              <tr><td>Parameters</td><td>464,739</td><td>464,931</td></tr>
+              <tr><td>Latent Dimensions</td><td>16,384 (flattened 16×16×64)</td><td>64 (μ, σ parameterized)</td></tr>
+              <tr><td>Base Channels</td><td colspan="2">32</td></tr>
+              <tr><td>Total Parameters</td><td>464,739</td><td>464,931</td></tr>
+              <tr><td>Encoder</td><td colspan="2">Conv2d + BatchNorm + LeakyReLU (4 blocks)</td></tr>
+              <tr><td>Decoder</td><td colspan="2">ConvTranspose2d + BatchNorm + ReLU (4 blocks)</td></tr>
+              <tr><td>Final Activation</td><td colspan="2">Tanh</td></tr>
+              <tr><td>Learning Rate</td><td colspan="2">0.001</td></tr>
+              <tr><td>Optimizer</td><td>AdamW</td><td>Adam</td></tr>
+              <tr><td>Scheduler</td><td>CosineAnnealingLR</td><td>-</td></tr>
+              <tr><td>Batch Size</td><td colspan="2">32</td></tr>
+              <tr><td>Early Stopping</td><td colspan="2">Patience = 5</td></tr>
+              <tr><td>Training Samples</td><td colspan="2">76,500</td></tr>
+              <tr><td>Validation Samples</td><td colspan="2">8,500</td></tr>
+              <tr><td>Test Samples</td><td colspan="2">355</td></tr>
+              <tr><td>Number of Classes</td><td colspan="2">17 wallpaper symmetry groups</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--/ Model Configuration. -->
+  </div>
+</section>
+
+<!-- ==================== STANDARD AUTOENCODER SECTION ==================== -->
+<section class="section" id="standard-ae">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2" style="border-bottom: 3px solid #7c4dff; padding-bottom: 10px;">
+          <span style="color: #7c4dff;">Standard Autoencoder</span> — Deterministic Baseline (Best Reconstruction)
+        </h2>
+        
+        <div class="content has-text-justified">
+          <p>
+            The Standard Convolutional Autoencoder represents our <strong>deterministic baseline</strong>. 
+            Unlike VAEs, it directly maps inputs to a fixed latent vector without probabilistic sampling. 
+            This approach maximizes reconstruction fidelity by not enforcing any prior distribution on the latent space.
+          </p>
+          <div class="notification is-link is-light">
+            <strong>🏆 Key Achievement:</strong> The Standard Autoencoder achieves the <strong>lowest Test MSE (0.061)</strong> 
+            among all models, with the <strong>fastest training time (1h 8min)</strong>. It excels at preserving 
+            fine details in reconstructions but produces a high-dimensional, unstructured latent space.
+          </div>
+        </div>
+
+        <h3 class="title is-4">Architecture Details</h3>
+        <div class="content">
+          <pre><code>ConvAutoencoder(
+  (encoder): Sequential(
+    Conv2d(3, 32, kernel=3, stride=2, padding=1) → BatchNorm2d → LeakyReLU(0.2)
+    Conv2d(32, 64, kernel=3, stride=2, padding=1) → BatchNorm2d → LeakyReLU(0.2)
+    Conv2d(64, 128, kernel=3, stride=2, padding=1) → BatchNorm2d → LeakyReLU(0.2)
+    Conv2d(128, 64, kernel=3, stride=2, padding=1) → BatchNorm2d → LeakyReLU(0.2)
+  )  → Output: [B, 64, 16, 16] = 16,384 dimensions
+  
+  (decoder): Sequential(
+    ConvTranspose2d(64, 128, kernel=4, stride=2, padding=1) → BatchNorm2d → ReLU
+    ConvTranspose2d(128, 64, kernel=4, stride=2, padding=1) → BatchNorm2d → ReLU
+    ConvTranspose2d(64, 32, kernel=4, stride=2, padding=1) → BatchNorm2d → ReLU
+    ConvTranspose2d(32, 3, kernel=4, stride=2, padding=1) → Tanh
+  )
+)</code></pre>
+        </div>
+
+        <h3 class="title is-4">Dataset Overview</h3>
+        <div class="columns">
+          <div class="column is-full">
+            <img src="./sources/standart_autoencoder/image.png" alt="Dataset Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Sample images from the 17 wallpaper symmetry groups: cm, cmm, p1, p2, p3, p31m, p3m1, p4, p4g, p4m, p6, p6m, pg, pgg, pm, pmg, pmm</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Training Progress & Convergence</h3>
+        <div class="content has-text-justified">
+          <p>
+            Training was conducted for <strong>21 epochs</strong> before early stopping was triggered at epoch 16 
+            (best validation loss). The deterministic nature of the model led to <strong>rapid and stable convergence</strong>.
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Epochs Trained</td><td>30 (early stopping at 21)</td></tr>
+              <tr><td>Final Training Loss</td><td>0.009903</td></tr>
+              <tr><td>Final Validation Loss</td><td>0.009579</td></tr>
+              <tr><td>Best Validation Loss</td><td><strong>0.009285</strong></td></tr>
+              <tr><td>Training Time</td><td><strong>1 hour 8 minutes</strong> (fastest)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Reconstruction Results</h3>
+        <div class="content has-text-justified">
+          <p>
+            The Standard Autoencoder produces <strong>sharp, detailed reconstructions</strong> that closely match 
+            the original images. Fine patterns and textures are well-preserved across all symmetry classes.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 1.png" alt="Reconstruction Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Training history showing loss convergence</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 2.png" alt="Reconstruction 2 Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Original vs Reconstructed comparison</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Per-Class Reconstruction Comparison</h3>
+        <div class="columns">
+          <div class="column is-full">
+            <img src="./sources/standart_autoencoder/per_class_reconstructions.png" alt="Per Class Reconstructions" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Comprehensive per-class reconstruction examples showing original (top) and reconstructed (bottom) images for all 17 symmetry groups</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Analysis - t-SNE & PCA</h3>
+        <div class="content has-text-justified">
+
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 3.png" alt="t-SNE Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>t-SNE visualization showing class separation in latent space</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 4.png" alt="PCA Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>PCA projection (2D captures only 14.1% of variance)<br>PCA analysis: 272 components needed to explain 95% of variance
+            </em></p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 5.png" alt="PCA Analysis Standard AE" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em></em></p>
+          </div>
+        </div>
+
+
+
+
+
+        <h3 class="title is-4">Error Distribution Analysis</h3>
+        <div class="content has-text-justified">
+          <p>
+            Detailed error distribution analysis reveals the reconstruction quality across the test set.
+          </p>
+        </div>
+
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Test Samples</td><td>355</td></tr>
+              <tr><td>Mean Error</td><td>0.060758</td></tr>
+              <tr><td>Std Error</td><td>0.065446</td></tr>
+              <tr><td>Min Error</td><td>0.000499</td></tr>
+              <tr><td>Max Error</td><td>0.513804</td></tr>
+              <tr><td>Median Error</td><td>0.038702</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Feature Maps</h3>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 8.png" alt="Feature Maps 1" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Encoder feature map visualization</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 9.png" alt="Feature Maps 2" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Individual Channel Feature Maps</em></p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 10.png" alt="Latent Viz 1" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Encoder feature map visualization</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 11.png" alt="Latent Viz 2" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Individual Channel Feature Maps</em></p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column is-8 is-offset-2">
+            <img src="./sources/standart_autoencoder/image 12.png" alt="Latent Stats" style="width: 100%; border-radius: 8px;">
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 6.png" alt="Error Dist 1" style="width: 100%; border-radius: 8px;">
+           
+          </div>
+          <div class="column">
+            <img src="./sources/standart_autoencoder/image 7.png" alt="Error Dist 2" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em></em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Statistics</h3>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Latent Vector Dimension</td><td><strong>16,384</strong></td><td>Much larger than VAE (64)</td></tr>
+              <tr><td>Mean Latent Value</td><td>1.078246</td><td>Not centered at 0 (no regularization)</td></tr>
+              <tr><td>Std Latent Value</td><td>0.920277</td><td>Uncontrolled variance</td></tr>
+              <tr><td>Min Latent Value</td><td>-3.047380</td><td>Wide range</td></tr>
+              <tr><td>Max Latent Value</td><td>12.810332</td><td>Unbounded positive values</td></tr>
+              <tr><td>Sparsity (% zeros)</td><td>0.84%</td><td>Low sparsity</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+        <div class="content has-text-justified">
+          <p>
+            Test MSE Loss: <strong>0.060758</strong> — the best among all models tested. The class-wise 
+            analysis shows consistent performance with the expected pattern of simpler symmetries being easier to reconstruct.
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth is-size-7">
+            <thead>
+              <tr><th>Rank</th><th>Class</th><th>Mean MSE</th><th>Std</th><th>Performance</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>p1</td><td><strong>0.030025</strong></td><td>±0.027309</td><td style="color: green;">Best</td></tr>
+              <tr><td>2</td><td>pm</td><td>0.036713</td><td>±0.030132</td><td style="color: green;">Excellent</td></tr>
+              <tr><td>3</td><td>cm</td><td>0.043554</td><td>±0.033758</td><td style="color: green;">Excellent</td></tr>
+              <tr><td>4</td><td>p3m1</td><td>0.046524</td><td>±0.038429</td><td style="color: green;">Excellent</td></tr>
+              <tr><td>5</td><td>pmg</td><td>0.049887</td><td>±0.038073</td><td>Good</td></tr>
+              <tr><td>6</td><td>p3</td><td>0.052804</td><td>±0.043831</td><td>Good</td></tr>
+              <tr><td>7</td><td>p31m</td><td>0.053864</td><td>±0.036063</td><td>Good</td></tr>
+              <tr><td>8</td><td>p2</td><td>0.058557</td><td>±0.058189</td><td>Good</td></tr>
+              <tr><td>9</td><td>p4m</td><td>0.058996</td><td>±0.035134</td><td>Good</td></tr>
+              <tr><td>10</td><td>pg</td><td>0.061262</td><td>±0.060334</td><td>Average</td></tr>
+              <tr><td>11</td><td>cmm</td><td>0.062279</td><td>±0.075607</td><td>Average</td></tr>
+              <tr><td>12</td><td>p4g</td><td>0.064847</td><td>±0.051951</td><td>Average</td></tr>
+              <tr><td>13</td><td>pmm</td><td>0.068911</td><td>±0.051598</td><td>Average</td></tr>
+              <tr><td>14</td><td>pgg</td><td>0.074798</td><td>±0.081493</td><td>Below Average</td></tr>
+              <tr><td>15</td><td>p6m</td><td>0.087812</td><td>±0.075404</td><td>Below Average</td></tr>
+              <tr><td>16</td><td>p4</td><td>0.107977</td><td>±0.126374</td><td style="color: orange;">Difficult</td></tr>
+              <tr><td>17</td><td>p6</td><td>0.110968</td><td>±0.096030</td><td style="color: red;">Worst</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== BETA = 0.5 SECTION ==================== -->
+<section class="section" id="beta-05" style="background-color: #f5f5f5;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2" style="border-bottom: 3px solid #3273dc; padding-bottom: 10px;">
+          <span style="color: #3273dc;">β-VAE (β = 0.5)</span> — Reconstruction-Focused Variational Model
+        </h2>
+        
+        <div class="content has-text-justified">
+          <p>
+            When β < 1, the model assigns less weight to the KL divergence term, effectively prioritizing 
+            reconstruction accuracy over latent space regularization. This configuration bridges the gap 
+            between deterministic autoencoders and fully regularized VAEs.
+          </p>
+          <div class="notification is-info is-light">
+            <strong>Key Insight:</strong> β = 0.5 produces the best VAE reconstructions with Test VAE Loss of 0.129, 
+            but at the cost of a less organized latent space with higher KL divergence (9.79).
+          </div>
+        </div>
+
+        <h3 class="title is-4">Dataset Overview</h3>
+        <div class="columns">
+          <div class="column is-full">
+            <img src="./sources/beta=0.5/beta 0 5/image.png" alt="Dataset β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Sample images from the 17 wallpaper symmetry groups used for training</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Training Progress & Convergence</h3>
+        <div class="content has-text-justified">
+          <p>
+            Training was conducted for <strong>28 epochs</strong> before early stopping was triggered. 
+            The model achieved rapid convergence, with validation loss stabilizing around epoch 20.
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Epoch</th>
+                <th>Total Loss</th>
+                <th>Reconstruction Loss</th>
+                <th>β × KL Loss</th>
+                <th>Validation Loss</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>0.060554</td><td>0.047717</td><td>0.012837</td><td>0.037657</td></tr>
+              <tr><td>5</td><td>0.037747</td><td>0.027659</td><td>0.010087</td><td>0.029641</td></tr>
+              <tr><td>10</td><td>0.035042</td><td>0.025074</td><td>0.009969</td><td>0.028796</td></tr>
+              <tr><td>15</td><td>0.033824</td><td>0.023898</td><td>0.009927</td><td>0.028311</td></tr>
+              <tr><td>20</td><td>0.033072</td><td>0.023174</td><td>0.009899</td><td>0.027860</td></tr>
+              <tr><td>23 (Best)</td><td>0.032805</td><td>0.022896</td><td>0.009909</td><td><strong>0.027613</strong></td></tr>
+              <tr><td>28 (Final)</td><td>0.032557</td><td>0.022665</td><td>0.009892</td><td>0.027669</td></tr>
+            </tbody>
+          </table>
+          <p class="has-text-centered"><em>Training completed in 2 hours 39 minutes (Wall time)</em></p>
+        </div>
+
+        <h3 class="title is-4">Reconstruction Results</h3>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 1.png" alt="Reconstruction 1 β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Original vs Reconstructed samples (Set 1)</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 2.png" alt="Reconstruction 2 β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Original vs Reconstructed samples (Set 2)</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Analysis - PCA Visualization</h3>
+        <div class="content has-text-justified">
+          <p>
+            Principal Component Analysis (PCA) was applied to the 64-dimensional latent representations. 
+            The first two principal components capture <strong>60.93%</strong> of the total variance.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 3.png" alt="PCA 1 β=0.5" style="width: 100%; border-radius: 8px;">
+
+          </div>
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 4.png" alt="PCA 2 β=0.5" style="width: 100%; border-radius: 8px;">
+
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 5.png" alt="PCA 3 β=0.5" style="width: 100%; border-radius: 8px;">
+
+          </div>
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 6.png" alt="PCA 4 β=0.5" style="width: 100%; border-radius: 8px;">
+
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Statistics</h3>
+        <div class="columns">
+          <div class="column is-8 is-offset-2">
+            <img src="./sources/beta=0.5/beta 0 5/image 7.png" alt="Latent Stats β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Latent Space Interpolation</em></p>
+          </div>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+                <th>Ideal Value</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>μ Mean</td><td>0.0003</td><td>0</td><td>✅ Very close to ideal</td></tr>
+              <tr><td>μ Std</td><td>0.2235</td><td>0</td><td>⚠️ Some variation across dimensions</td></tr>
+              <tr><td>σ Mean</td><td>0.8551</td><td>1</td><td>⚠️ Slightly compressed variance</td></tr>
+              <tr><td>σ Std</td><td>0.2397</td><td>0</td><td>⚠️ Inconsistent across dimensions</td></tr>
+              <tr><td>Total KL Divergence</td><td><strong>9.7914</strong></td><td>0</td><td>❌ High - less regularized</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+        <div class="content has-text-justified">
+          <p>
+            Test VAE Loss: <strong>0.129268</strong>. Best among VAE models for reconstruction quality.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 8.png" alt="Class-wise 1 β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Class-wise MSE distribution</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=0.5/beta 0 5/image 9.png" alt="Class-wise 2 β=0.5" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Detailed reconstruction error analysis</em></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== BETA = 1.0 SECTION ==================== -->
+<section class="section" id="beta-10">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2" style="border-bottom: 3px solid #48c774; padding-bottom: 10px;">
+          <span style="color: #48c774;">β-VAE (β = 1.0)</span> — Standard VAE (Balanced)
+        </h2>
+        
+        <div class="content has-text-justified">
+          <p>
+            When β = 1, the model implements the <strong>standard Variational Autoencoder</strong> formulation 
+            as originally proposed by Kingma & Welling (2013). This configuration provides a balanced trade-off 
+            between reconstruction quality and latent space regularization.
+          </p>
+          <div class="notification is-success is-light">
+            <strong>Key Insight:</strong> β = 1.0 achieves the <strong>highest PCA explained variance (64.47%)</strong> 
+            in just 2 dimensions, indicating the most compact and informative latent representations among all models.
+          </div>
+        </div>
+
+        <h3 class="title is-4">Dataset Overview</h3>
+        <div class="columns">
+          <div class="column is-full">
+            <img src="./sources/beta =1.0 (vae)/image.png" alt="Dataset β=1.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Sample images from the symmetry dataset - 17 wallpaper groups</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Training Progress & Convergence</h3>
+        <div class="content has-text-justified">
+          <p>
+            Training completed the full <strong>30 epochs</strong> without early stopping. 
+            The balanced loss formulation led to steady improvement throughout training.
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Epoch</th>
+                <th>Total Loss</th>
+                <th>Reconstruction Loss</th>
+                <th>β × KL Loss</th>
+                <th>Validation Loss</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>0.070950</td><td>0.051767</td><td>0.019183</td><td>0.046682</td></tr>
+              <tr><td>10</td><td>0.043059</td><td>0.030252</td><td>0.012807</td><td>0.035840</td></tr>
+              <tr><td>20</td><td>0.040939</td><td>0.028202</td><td>0.012737</td><td>0.034617</td></tr>
+              <tr><td>30 (Final/Best)</td><td>0.040207</td><td>0.027504</td><td>0.012703</td><td><strong>0.034520</strong></td></tr>
+            </tbody>
+          </table>
+          <p class="has-text-centered"><em>Training completed in 2 hours 49 minutes (Wall time)</em></p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 1.png" alt="Reconstruction 1 β=1.0" style="width: 100%; border-radius: 8px;">
+
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 2.png" alt="Reconstruction 2 β=1.0" style="width: 100%; border-radius: 8px;">
+
+          </div>
+        </div>
+
+       
+
+        <h3 class="title is-4">Latent Space Analysis - PCA Visualization</h3>
+        <div class="content has-text-justified">
+          <p>
+            The PCA analysis reveals that <strong>64.47%</strong> of the variance is captured by the first 
+            two principal components - the highest among all models tested.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 3.png" alt="PCA 1 β=1.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>PCA projection with class labels</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 4.png" alt="PCA 2 β=1.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Latent space density visualization</em></p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 5.png" alt="PCA 3 β=1.0" style="width: 100%; border-radius: 8px;">
+
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 6.png" alt="PCA 4 β=1.0" style="width: 100%; border-radius: 8px;">
+
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Interpolation</h3>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 7.png" alt="Latent Stats 1 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 8.png" alt="Latent Stats 2 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 9.png" alt="Latent Stats 3 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 10.png" alt="Latent Stats 4 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 11.png" alt="Latent Stats 5 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 12.png" alt="Latent Stats 6 β=1.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+        </div>
+
+        <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+        <div class="content has-text-justified">
+          <p>
+            Test VAE Loss: <strong>0.155442</strong>.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 13.png" alt="Class-wise 1 β=1.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Reconstruction error by symmetry class</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta =1.0 (vae)/image 14.png" alt="Class-wise 2 β=1.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Detailed error distribution</em></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== BETA = 4.0 SECTION ==================== -->
+<section class="section" id="beta-40" style="background-color: #f5f5f5;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2" style="border-bottom: 3px solid #ff3860; padding-bottom: 10px;">
+          <span style="color: #ff3860;">β-VAE (β = 4.0)</span> — Disentanglement-Focused Training
+        </h2>
+        
+        <div class="content has-text-justified">
+          <p>
+            When β > 1, the model places stronger emphasis on the KL divergence term, encouraging the 
+            latent distribution to closely match the standard normal prior. This promotes 
+            <strong>disentanglement</strong> — where individual latent dimensions capture independent 
+            factors of variation.
+          </p>
+          <div class="notification is-danger is-light">
+            <strong>Key Insight:</strong> β = 4.0 achieves the <strong>lowest KL divergence (2.64)</strong> and 
+            the most regularized latent space (σ mean = 0.963, closest to ideal 1.0), but has the highest 
+            reconstruction error among VAE models.
+          </div>
+        </div>
+
+        <h3 class="title is-4">Dataset Overview</h3>
+        <div class="columns">
+          <div class="column is-full">
+            <img src="./sources/beta=4.0/beta = 4 0/image.png" alt="Dataset β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Sample images from the 17 wallpaper symmetry groups</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Training Progress & Convergence</h3>
+        <div class="content has-text-justified">
+          <p>
+            Training was conducted for <strong>25 epochs</strong> before early stopping was triggered. 
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Epoch</th>
+                <th>Total Loss</th>
+                <th>Reconstruction Loss</th>
+                <th>β × KL Loss</th>
+                <th>Validation Loss</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>0.113903</td><td>0.064053</td><td>0.049851</td><td>0.061474</td></tr>
+              <tr><td>10</td><td>0.065450</td><td>0.046287</td><td>0.019163</td><td>0.057071</td></tr>
+              <tr><td>20 (Best)</td><td>0.062415</td><td>0.043289</td><td>0.019126</td><td><strong>0.055471</strong></td></tr>
+              <tr><td>25 (Final)</td><td>0.061914</td><td>0.042766</td><td>0.019148</td><td>0.055626</td></tr>
+            </tbody>
+          </table>
+          <p class="has-text-centered"><em>Training completed in 2 hours 25 minutes (Wall time)</em></p>
+          <div class="columns">
+            <div class="column">
+              <img src="./sources/beta=4.0/beta = 4 0/image 1.png" alt="Reconstruction 1 β=4.0" style="width: 100%; border-radius: 8px;">
+
+            </div>
+            <div class="column">
+              <img src="./sources/beta=4.0/beta = 4 0/image 2.png" alt="Reconstruction 2 β=4.0" style="width: 100%; border-radius: 8px;">
+
+            </div>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Reconstruction Results</h3>
+        <div class="columns">
+
+        </div>
+
+        <h3 class="title is-4">Latent Space Analysis - PCA Visualization</h3>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 4.png" alt="PCA 1 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>t-SNE visualization</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 5.png" alt="PCA 2 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Latent Traversal</em></p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 6.png" alt="PCA 3 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Random Sampling</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 7.png" alt="PCA 4 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Latent Space Statistics</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 3.png" alt="Reconstruction 3 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>B vae reconstruction</em></p>
+          </div>
+        </div>
+
+        <h3 class="title is-4">Latent Space Interpolation</h3>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 8.png" alt="Latent Stats 1 β=4.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 9.png" alt="Latent Stats 2 β=4.0" style="width: 100%; border-radius: 8px;">
+           
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 10.png" alt="Latent Stats 3 β=4.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 11.png" alt="Latent Stats 4 β=4.0" style="width: 100%; border-radius: 8px;">
+            
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 12.png" alt="Latent Stats 5 β=4.0" style="width: 100%; border-radius: 8px;">
+           
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 13.png" alt="Latent Stats 6 β=4.0" style="width: 100%; border-radius: 8px;">
+          
+          </div>
+        </div>
+
+        <div class="content">
+          <table class="table is-striped is-fullwidth">
+            <thead>
+              <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+                <th>Ideal Value</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>μ Mean</td><td><strong>0.0002</strong></td><td>0</td><td>✅ Excellent - closest to ideal</td></tr>
+              <tr><td>μ Std</td><td><strong>0.1568</strong></td><td>0</td><td>✅ Best consistency</td></tr>
+              <tr><td>σ Mean</td><td><strong>0.9625</strong></td><td>1</td><td>✅ Excellent - closest to ideal</td></tr>
+              <tr><td>σ Std</td><td><strong>0.1321</strong></td><td>0</td><td>✅ Most consistent</td></tr>
+              <tr><td>Total KL Divergence</td><td><strong>2.6418</strong></td><td>0</td><td>✅ Lowest - best regularization</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+        <div class="content has-text-justified">
+          <p>
+            Test VAE Loss: <strong>0.233418</strong>.
+          </p>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 14.png" alt="Class-wise 1 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Class-wise reconstruction error</em></p>
+          </div>
+          <div class="column">
+            <img src="./sources/beta=4.0/beta = 4 0/image 15.png" alt="Class-wise 2 β=4.0" style="width: 100%; border-radius: 8px;">
+            <p class="has-text-centered"><em>Detailed error analysis</em></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================== COMPARATIVE ANALYSIS SECTION ==================== -->
+<section class="section" id="comparison">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2" style="border-bottom: 3px solid #363636; padding-bottom: 10px;">
+          Comprehensive Comparative Analysis
+        </h2>
+
+        <div class="content has-text-justified">
+          <p>
+            This section provides a complete comparison across all four model configurations, highlighting 
+            the fundamental trade-offs between <strong>deterministic vs probabilistic</strong> modeling and 
+            the effects of <strong>latent regularization strength</strong>.
+          </p>
+        </div>
+
+        <h3 class="title is-4">Complete Performance Summary</h3>
+        <div class="content">
+          <table class="table is-striped is-fullwidth is-hoverable">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th style="background-color: #ede7f6;">Standard AE</th>
+                <th style="background-color: #ebfffc;">β = 0.5</th>
+                <th style="background-color: #effaf3;">β = 1.0</th>
+                <th style="background-color: #feecf0;">β = 4.0</th>
+                <th>Winner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Test MSE Loss</strong></td>
+                <td style="color: green;"><strong>0.061</strong></td>
+                <td>0.129</td>
+                <td>0.155</td>
+                <td style="color: red;">0.233</td>
+                <td>Standard AE 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Best Validation Loss</strong></td>
+                <td style="color: green;"><strong>0.009</strong></td>
+                <td>0.028</td>
+                <td>0.035</td>
+                <td style="color: red;">0.055</td>
+                <td>Standard AE 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>KL Divergence</strong></td>
+                <td>N/A</td>
+                <td style="color: red;">9.79</td>
+                <td>6.30</td>
+                <td style="color: green;"><strong>2.64</strong></td>
+                <td>β = 4.0 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Latent Dimensions</strong></td>
+                <td>16,384</td>
+                <td colspan="3">64</td>
+                <td>VAEs (compact)</td>
+              </tr>
+              <tr>
+                <td><strong>PCA Variance (2D)</strong></td>
+                <td>14.1%</td>
+                <td>60.93%</td>
+                <td style="color: green;"><strong>64.47%</strong></td>
+                <td>-</td>
+                <td>β = 1.0 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>σ Mean (ideal: 1)</strong></td>
+                <td>N/A</td>
+                <td>0.855</td>
+                <td>0.904</td>
+                <td style="color: green;"><strong>0.963</strong></td>
+                <td>β = 4.0 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Best Class MSE (p1)</strong></td>
+                <td style="color: green;"><strong>0.030</strong></td>
+                <td>0.057</td>
+                <td>0.070</td>
+                <td style="color: red;">0.123</td>
+                <td>Standard AE 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Worst Class MSE (p6)</strong></td>
+                <td style="color: green;"><strong>0.111</strong></td>
+                <td>0.172</td>
+                <td>0.194</td>
+                <td style="color: red;">0.301</td>
+                <td>Standard AE 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Training Time</strong></td>
+                <td style="color: green;"><strong>1h 8m</strong></td>
+                <td>2h 39m</td>
+                <td>2h 50m</td>
+                <td>2h 25m</td>
+                <td>Standard AE 🏆</td>
+              </tr>
+              <tr>
+                <td><strong>Training Epochs</strong></td>
+                <td>21</td>
+                <td>28</td>
+                <td>30</td>
+                <td>25</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td><strong>Generative Sampling</strong></td>
+                <td style="color: red;">❌ Poor</td>
+                <td>⚠️ Limited</td>
+                <td>✅ Good</td>
+                <td style="color: green;"><strong>✅ Best</strong></td>
+                <td>β = 4.0 🏆</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Model Comparison Summary</h3>
+        
+        <div class="columns">
+          <div class="column">
+            <div class="box" style="border-left: 4px solid #7c4dff;">
+              <h4 class="title is-5" style="color: #7c4dff;">🏆 Standard Autoencoder</h4>
+              <ul>
+                <li><strong>Best for:</strong> Maximum reconstruction quality</li>
+                <li><strong>Pros:</strong> Lowest MSE, fastest training, sharpest details</li>
+                <li><strong>Cons:</strong> No generative capability, huge latent space</li>
+                <li><strong>Use case:</strong> Image compression, denoising</li>
+              </ul>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box" style="border-left: 4px solid #3273dc;">
+              <h4 class="title is-5" style="color: #3273dc;">β = 0.5: VAE Reconstruction Focus</h4>
+              <ul>
+                <li><strong>Best for:</strong> Balance between reconstruction & generation</li>
+                <li><strong>Pros:</strong> Best VAE reconstruction, compact latent</li>
+                <li><strong>Cons:</strong> Less regularized, limited sampling</li>
+                <li><strong>Use case:</strong> Semi-generative applications</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box" style="border-left: 4px solid #48c774;">
+              <h4 class="title is-5" style="color: #48c774;">β = 1.0: Standard VAE</h4>
+              <ul>
+                <li><strong>Best for:</strong> General-purpose representation learning</li>
+                <li><strong>Pros:</strong> Best PCA variance, theoretically grounded</li>
+                <li><strong>Cons:</strong> Moderate on all metrics</li>
+                <li><strong>Use case:</strong> Feature extraction, transfer learning</li>
+              </ul>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box" style="border-left: 4px solid #ff3860;">
+              <h4 class="title is-5" style="color: #ff3860;">β = 4.0: Disentanglement Champion</h4>
+              <ul>
+                <li><strong>Best for:</strong> Interpretable latent spaces, generation</li>
+                <li><strong>Pros:</strong> Best regularization, smooth latent traversals</li>
+                <li><strong>Cons:</strong> Blurry reconstructions, highest MSE</li>
+                <li><strong>Use case:</strong> Controllable generation, style transfer</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="title is-4">The 17 Wallpaper Symmetry Groups</h3>
+        <div class="content has-text-justified">
+          <p>
+            Our experiments reveal consistent patterns across all models regarding class difficulty:
+          </p>
+        </div>
+        <div class="content">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>Difficulty</th>
+                <th>Classes</th>
+                <th>Characteristics</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color: green;"><strong>Easy</strong></td>
+                <td><code>p1</code>, <code>pm</code>, <code>cm</code></td>
+                <td>Simple translation and/or single mirror symmetry</td>
+              </tr>
+              <tr>
+                <td><strong>Moderate</strong></td>
+                <td><code>pmg</code>, <code>p3m1</code>, <code>p3</code>, <code>p31m</code>, <code>p2</code></td>
+                <td>2-fold or 3-fold rotational symmetry</td>
+              </tr>
+              <tr>
+                <td><strong>Challenging</strong></td>
+                <td><code>p4m</code>, <code>cmm</code>, <code>pg</code>, <code>p4g</code>, <code>pmm</code></td>
+                <td>4-fold symmetry or glide reflections</td>
+              </tr>
+              <tr>
+                <td style="color: red;"><strong>Difficult</strong></td>
+                <td><code>pgg</code>, <code>p6m</code>, <code>p4</code>, <code>p6</code></td>
+                <td>6-fold symmetry or complex combined symmetries</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-4">Practical Recommendations</h3>
+        <div class="content">
+          <div class="notification is-primary is-light">
+            <h4>Choosing the Right Model</h4>
+            <ol>
+              <li><strong>For maximum reconstruction quality:</strong> Use Standard Autoencoder</li>
+              <li><strong>For compact representations with good reconstruction:</strong> Use β-VAE with β = 0.5</li>
+              <li><strong>For feature learning and downstream classification:</strong> Use Standard VAE (β = 1.0)</li>
+              <li><strong>For interpretable latent spaces and generation:</strong> Use β-VAE with β ≥ 4.0</li>
+              <li><strong>For fast training and experimentation:</strong> Use Standard Autoencoder</li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="theory">
+  <div class="container is-max-desktop content">
+    <h2 class="title">Understanding Autoencoders vs VAEs</h2>
+    <div class="content has-text-justified">
+      <h4>Standard Autoencoder</h4>
+      <p>
+        A deterministic model that learns a compressed representation by minimizing reconstruction error:
+      </p>
+      <div class="box">
+        <p style="text-align: center; font-size: 1.2em;">
+          <strong>L<sub>AE</sub> = ||x - D(E(x))||²</strong>
+        </p>
+      </div>
+      
+      <h4>Variational Autoencoder (VAE)</h4>
+      <p>
+        A probabilistic model that learns a latent distribution regularized toward a prior:
+      </p>
+      <div class="box">
+        <p style="text-align: center; font-size: 1.2em;">
+          <strong>L<sub>VAE</sub> = E<sub>q(z|x)</sub>[||x - D(z)||²] + KL(q(z|x) || N(0, I))</strong>
+        </p>
+      </div>
+
+      <h4>β-VAE</h4>
+      <p>
+        Extends VAE with a hyperparameter β controlling the strength of latent regularization:
+      </p>
+      <div class="box">
+        <p style="text-align: center; font-size: 1.2em;">
+          <strong>L<sub>β-VAE</sub> = E<sub>q(z|x)</sub>[||x - D(z)||²] + β · KL(q(z|x) || N(0, I))</strong>
+        </p>
+      </div>
+      
+      <ul>
+        <li><strong>β < 1:</strong> Prioritizes reconstruction over regularization</li>
+        <li><strong>β = 1:</strong> Standard VAE (ELBO objective)</li>
+        <li><strong>β > 1:</strong> Prioritizes disentanglement over reconstruction</li>
+      </ul>
+    </div>
+    
+    <h2 class="title">Dataset</h2>
+    <div class="content has-text-justified">
+      <p>
+        This research uses the <strong>Symmetry Dataset</strong> published on Zenodo, which contains images 
+        representing 17 categories of wallpaper symmetry groups. The dataset was generated based on the 
+        mathematical concept of wallpaper groups.
+      </p>
+      <div class="box">
+        <p><strong>Dataset Citation:</strong></p>
+        <p>
+          Guo, Y., & Agar, J. (2022). <em>Symmetry_Dataset</em> [Data set]. Zenodo. 
+          <a href="https://doi.org/10.5281/zenodo.7384734" target="_blank">https://doi.org/10.5281/zenodo.7384734</a>
+        </p>
+        <p>
+          <a href="https://zenodo.org/records/7384734" target="_blank">
+            <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7384734.svg" alt="DOI">
+          </a>
+        </p>
+      </div>
+      <ul>
+        <li><strong>Source:</strong> <a href="https://zenodo.org/records/7384734" target="_blank">Zenodo Repository</a></li>
+        <li><strong>Creators:</strong> Yichen Guo (Lehigh University), Joshua Agar (Drexel University)</li>
+        <li><strong>License:</strong> Creative Commons Attribution 4.0 International (CC BY 4.0)</li>
+        <li><strong>Size:</strong> 33.4 GB</li>
+        <li><strong>Categories:</strong> 17 wallpaper symmetry groups</li>
+      </ul>
+    </div>
+
+    <h2 class="title">References</h2>
+    <pre><code>@dataset{guo_2022_7384734,
+  author    = {Guo, Yichen and Agar, Joshua},
+  title     = {Symmetry\_Dataset},
+  year      = {2022},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.7384734},
+  url       = {https://doi.org/10.5281/zenodo.7384734}
+}
+
+@article{higgins2017betavae,
+  title     = {β-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework},
+  author    = {Higgins, Irina and Matthey, Loic and Pal, Arka and others},
+  journal   = {ICLR},
+  year      = {2017},
+}
+
+@article{kingma2014vae,
+  title     = {Auto-Encoding Variational Bayes},
+  author    = {Kingma, Diederik P. and Welling, Max},
+  journal   = {ICLR},
+  year      = {2014},
+}
+
+@article{hinton2006autoencoder,
+  title     = {Reducing the Dimensionality of Data with Neural Networks},
+  author    = {Hinton, Geoffrey E. and Salakhutdinov, Ruslan R.},
+  journal   = {Science},
+  year      = {2006},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="./sources/standart_autoencoder/">
+        <i class="fas fa-file-code"></i>
+      </a>
+      <a class="icon-link" href="#">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                            href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            Template adapted from the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+
+======================================================================
+               β-VAE MODEL REPORT - SYMMETRY CLASSIFICATION
+======================================================================
+
+📊 MODEL CONFIGURATION
+----------------------------------------------------------------------
+  • Model Type:           Beta Variational Autoencoder (β-VAE)
+  • Beta (β) Value:       1
+  • Image Size:           256x256
+  • Num Channels:         3
+  • Latent Channels:      64
+  • Base Channels:        32
+  • Parameters:           464,931
+
+📈 TRAINING INFO
+----------------------------------------------------------------------
+  • Training Samples:     76,500
+  • Validation Samples:   8,500
+  • Test Samples:         355
+  • Num Classes:          17
+  • Num Epochs:           30
+  • Learning Rate:        0.001
+  • Batch Size:           32
+
+📉 TRAINING RESULTS
+----------------------------------------------------------------------
+  • Final Train Loss:     0.040207
+  • Final Recon Loss:     0.027504
+  • Final KL Loss:        0.012703
+  • Final Val Loss:       0.034520
+
+🎯 TEST PERFORMANCE
+----------------------------------------------------------------------
+  • Test VAE Loss:        0.155442
+  • Best Class:           p1 (MSE: 0.070367)
+  • Worst Class:          p6 (MSE: 0.193823)
+
+🔬 LATENT SPACE ANALYSIS
+----------------------------------------------------------------------
+  • Total Latent Dims:    64
+  • μ Mean:               -0.0009 (Ideal: 0)
+  • μ Std:                0.2010
+  • σ Mean:               0.9042 (Ideal: 1)
+  • σ Std:                0.1983
+  • Avg KL Divergence:    6.2983
+
+💡 β-VAE INTERPRETATION
+----------------------------------------------------------------------
+  β = 1.0: Standard VAE behavior. Reconstruction and
+  latent regularization are balanced.
+
+======================================================================
+                         END OF REPORT
+======================================================================
