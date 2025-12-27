@@ -67,6 +67,9 @@
             <a class="navbar-item" href="standard-ae.html">
               Standard Autoencoder (Best Reconstruction)
             </a>
+            <a class="navbar-item" href="masked-ae.html">
+              Masked Autoencoder (Inpainting)
+            </a>
             <a class="navbar-item" href="beta-05.html">
               β = 0.5 (Reconstruction Focus)
             </a>
@@ -321,6 +324,17 @@
               <li>Test MSE: <strong>0.061</strong> (lowest)</li>
               <li>Training Time: 1h 8min (fastest)</li>
               <li>Latent Dim: 16,384</li>
+            </ul>
+          </a>
+        </div>
+        <div class="column is-half">
+          <a href="masked-ae.html" class="box" style="border-left: 4px solid #ff6b35; display: block;">
+            <h4 class="title is-5" style="color: #ff6b35;">Masked Autoencoder</h4>
+            <p><strong>Inpainting with 25% Masking</strong></p>
+            <ul>
+              <li>Test MSE: <strong>0.142</strong> (masked)</li>
+              <li>Training Time: 1h 26min</li>
+              <li>Self-supervised learning</li>
             </ul>
           </a>
         </div>
