@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="β-VAE with β=0.5 results for Wallpaper Symmetry Group Learning - A reconstruction-focused variational model.">
+    <meta name="keywords" content="β-VAE, VAE, β=0.5, Symmetry Learning, Wallpaper Groups, Deep Learning, Latent Space">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>β-VAE (β = 0.5) — Wallpaper Symmetry Learning</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <link rel="icon" href="./static/images/favicon.svg">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+                <a class="navbar-item" href="index.html">
+                    <span class="icon">
+                        <i class="fas fa-home"></i>
+                    </span>
+                </a>
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        Experiments
+                    </a>
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="standard-ae.html">
+                            Standard Autoencoder (Best Reconstruction)
+                        </a>
+                        <a class="navbar-item is-active" href="beta-05.html">
+                            β = 0.5 (Reconstruction Focus)
+                        </a>
+                        <a class="navbar-item" href="beta-10.html">
+                            β = 1.0 (Standard VAE)
+                        </a>
+                        <a class="navbar-item" href="beta-40.html">
+                            β = 4.0 (Disentanglement Focus)
+                        </a>
+                        <a class="navbar-item" href="comparison.html">
+                            Comparative Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- ==================== BETA = 0.5 SECTION ==================== -->
+    <section class="section" id="beta-05" style="background-color: #f5f5f5;">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <h2 class="title is-2" style="border-bottom: 3px solid #3273dc; padding-bottom: 10px;">
+                        <span style="color: #3273dc;">β-VAE (β = 0.5)</span> — Reconstruction-Focused Variational Model
+                    </h2>
+
+                    <div class="content has-text-justified">
+                        <p>
+                            When β < 1, the model assigns less weight to the KL divergence term, effectively
+                                prioritizing reconstruction accuracy over latent space regularization. This
+                                configuration bridges the gap between deterministic autoencoders and fully regularized
+                                VAEs. </p>
+                                <div class="notification is-info is-light">
+                                    <strong>Key Insight:</strong> β = 0.5 produces the best VAE reconstructions with
+                                    Test VAE Loss of 0.129,
+                                    but at the cost of a less organized latent space with higher KL divergence (9.79).
+                                </div>
+                    </div>
+
+                    <h3 class="title is-4">Dataset Overview</h3>
+                    <div class="columns">
+                        <div class="column is-full">
+                            <img src="./sources/beta=0.5/beta 0 5/image.png" alt="Dataset β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Sample images from the 17 wallpaper symmetry groups used
+                                    for training</em></p>
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">Training Progress & Convergence</h3>
+                    <div class="content has-text-justified">
+                        <p>
+                            Training was conducted for <strong>28 epochs</strong> before early stopping was triggered.
+                            The model achieved rapid convergence, with validation loss stabilizing around epoch 20.
+                        </p>
+                    </div>
+                    <div class="content">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Epoch</th>
+                                    <th>Total Loss</th>
+                                    <th>Reconstruction Loss</th>
+                                    <th>β × KL Loss</th>
+                                    <th>Validation Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>0.060554</td>
+                                    <td>0.047717</td>
+                                    <td>0.012837</td>
+                                    <td>0.037657</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>0.037747</td>
+                                    <td>0.027659</td>
+                                    <td>0.010087</td>
+                                    <td>0.029641</td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>0.035042</td>
+                                    <td>0.025074</td>
+                                    <td>0.009969</td>
+                                    <td>0.028796</td>
+                                </tr>
+                                <tr>
+                                    <td>15</td>
+                                    <td>0.033824</td>
+                                    <td>0.023898</td>
+                                    <td>0.009927</td>
+                                    <td>0.028311</td>
+                                </tr>
+                                <tr>
+                                    <td>20</td>
+                                    <td>0.033072</td>
+                                    <td>0.023174</td>
+                                    <td>0.009899</td>
+                                    <td>0.027860</td>
+                                </tr>
+                                <tr>
+                                    <td>23 (Best)</td>
+                                    <td>0.032805</td>
+                                    <td>0.022896</td>
+                                    <td>0.009909</td>
+                                    <td><strong>0.027613</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>28 (Final)</td>
+                                    <td>0.032557</td>
+                                    <td>0.022665</td>
+                                    <td>0.009892</td>
+                                    <td>0.027669</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="has-text-centered"><em>Training completed in 2 hours 39 minutes (Wall time)</em></p>
+                    </div>
+
+                    <h3 class="title is-4">Reconstruction Results</h3>
+                    <div class="columns">
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 1.png" alt="Reconstruction 1 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Original vs Reconstructed samples (Set 1)</em></p>
+                        </div>
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 2.png" alt="Reconstruction 2 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Original vs Reconstructed samples (Set 2)</em></p>
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">Latent Space Analysis - PCA Visualization</h3>
+                    <div class="content has-text-justified">
+                        <p>
+                            Principal Component Analysis (PCA) was applied to the 64-dimensional latent representations.
+                            The first two principal components capture <strong>60.93%</strong> of the total variance.
+                        </p>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 3.png" alt="PCA 1 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+
+                        </div>
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 4.png" alt="PCA 2 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 5.png" alt="PCA 3 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+
+                        </div>
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 6.png" alt="PCA 4 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">Latent Space Statistics</h3>
+                    <div class="columns">
+                        <div class="column is-8 is-offset-2">
+                            <img src="./sources/beta=0.5/beta 0 5/image 7.png" alt="Latent Stats β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Latent Space Interpolation</em></p>
+                        </div>
+                    </div>
+                    <div class="content">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Statistic</th>
+                                    <th>Value</th>
+                                    <th>Ideal Value</th>
+                                    <th>Interpretation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>μ Mean</td>
+                                    <td>0.0003</td>
+                                    <td>0</td>
+                                    <td>Very close to ideal</td>
+                                </tr>
+                                <tr>
+                                    <td>μ Std</td>
+                                    <td>0.2235</td>
+                                    <td>0</td>
+                                    <td>Some variation across dimensions</td>
+                                </tr>
+                                <tr>
+                                    <td>σ Mean</td>
+                                    <td>0.8551</td>
+                                    <td>1</td>
+                                    <td>Slightly compressed variance</td>
+                                </tr>
+                                <tr>
+                                    <td>σ Std</td>
+                                    <td>0.2397</td>
+                                    <td>0</td>
+                                    <td>Inconsistent across dimensions</td>
+                                </tr>
+                                <tr>
+                                    <td>Total KL Divergence</td>
+                                    <td><strong>9.7914</strong></td>
+                                    <td>0</td>
+                                    <td>High - less regularized</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+                    <div class="content has-text-justified">
+                        <p>
+                            Test VAE Loss: <strong>0.129268</strong>. Best among VAE models for reconstruction quality.
+                        </p>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 8.png" alt="Class-wise 1 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Class-wise MSE distribution</em></p>
+                        </div>
+                        <div class="column">
+                            <img src="./sources/beta=0.5/beta 0 5/image 9.png" alt="Class-wise 2 β=0.5"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Detailed reconstruction error analysis</em></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="./sources/standart_autoencoder/">
+                    <i class="fas fa-file-code"></i>
+                </a>
+                <a class="icon-link" href="#">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+                        <p>
+                            This website is licensed under a <a rel="license"
+                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                                Commons Attribution-ShareAlike 4.0 International License</a>.
+                        </p>
+                        <p>
+                            Template adapted from the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>
+                            project page.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

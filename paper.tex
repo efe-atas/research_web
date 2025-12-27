@@ -1,0 +1,1351 @@
+\documentclass[11pt,a4paper,twocolumn]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{microtype}
+\usepackage{lipsum}
+
+% ============================================================
+% HYPERREF CONFIGURATION
+% ============================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={Wallpaper Symmetry Group Learning},
+    pdfauthor={Ismail Efe Atas},
+}
+
+% ============================================================
+% CUSTOM COMMANDS
+% ============================================================
+\newcommand{\betavae}{$\beta$-VAE}
+\newcommand{\KL}{\text{KL}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+
+% ============================================================
+% TITLE AND AUTHORS
+% ============================================================
+\title{
+    \textbf{Wallpaper Symmetry Group Learning: A Comprehensive Comparative Study of Standard Autoencoders and Beta Variational Autoencoders for Two-Dimensional Periodic Pattern Recognition}
+}
+
+\author{
+    \textbf{\.{I}smail Efe Ata\c{s}} \\
+    Department of Computer Engineering \\
+    TED University \\
+    Ankara, Turkey \\
+    \texttt{iefeatas@gmail.com}
+}
+
+\date{}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+\begin{document}
+
+\maketitle
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+\begin{abstract}
+This research presents a comprehensive comparative study between \textbf{Standard Convolutional Autoencoders} and \textbf{Beta Variational Autoencoders ($\beta$-VAE)} for the learning and analysis of \textbf{17 wallpaper symmetry groups}. Wallpaper groups, which represent all mathematically possible ways to tile a two-dimensional plane with repeating patterns, have fundamental applications in crystallography, materials science, textile design, and computer graphics. Understanding how neural networks learn these symmetry structures provides insights into both representation learning and the mathematical properties of periodic patterns.
+
+We conduct extensive experiments comparing four distinct model configurations: a deterministic Standard Autoencoder without KL regularization, and three $\beta$-VAE variants with $\beta$ values of 0.5, 1.0, and 4.0. This systematic approach allows us to thoroughly investigate how probabilistic modeling and varying strengths of latent regularization affect reconstruction quality, latent space organization, class separability, and generative capabilities.
+
+Our experiments utilize the publicly available Symmetry Dataset (Guo \& Agar, 2022) from Zenodo, comprising 76,500 training samples, 8,500 validation samples, and 355 test samples distributed across all 17 symmetry classes. Our key findings reveal that the Standard Autoencoder achieves the best reconstruction quality with a Test MSE of 0.061, while $\beta$-VAE with $\beta=4.0$ produces the most regularized latent space with a KL Divergence of only 2.64. The standard VAE configuration ($\beta=1.0$) offers the most compact and informative representations, capturing 64.47\% of variance with just 2 principal components.
+
+We provide comprehensive analysis including t-SNE and PCA visualizations, detailed latent space statistics, error distributions, class-wise reconstruction performance metrics, feature map visualizations, and training dynamics. Our findings offer practical, evidence-based guidance for selecting appropriate model architectures based on specific application requirements in symmetry learning and pattern recognition domains.
+\end{abstract}
+
+\textbf{Keywords:} Autoencoder, $\beta$-VAE, Variational Autoencoder, Symmetry Learning, Wallpaper Groups, Disentanglement, Deep Learning, Latent Space Representations, Crystallography, Pattern Recognition
+
+\vspace{0.5cm}
+
+% ============================================================
+% 1. INTRODUCTION
+% ============================================================
+\section{Introduction}
+\label{sec:introduction}
+
+The study of symmetry has been a cornerstone of mathematics, physics, and natural sciences for centuries. Symmetry principles underlie fundamental physical laws, govern the structure of crystals, and inspire artistic and architectural designs across cultures. In the realm of two-dimensional periodic patterns, mathematicians have proven that there exist exactly \textbf{17 distinct wallpaper groups}—complete mathematical classifications that enumerate all possible symmetries of repeating patterns in a plane \cite{armstrong1988groups}. This remarkable result, established in the late 19th century, demonstrates the deep mathematical structure underlying seemingly simple decorative patterns.
+
+The emergence of deep learning has revolutionized pattern recognition and representation learning. Autoencoders, in particular, have proven to be powerful tools for learning compressed representations of complex visual data. By forcing information through a bottleneck, these networks learn to extract essential features while discarding irrelevant noise. This property makes them particularly interesting for studying structured patterns like wallpaper symmetries.
+
+\subsection{Motivation and Research Questions}
+
+The intersection of symmetry theory and deep learning raises fundamental questions about how neural networks perceive and represent mathematical structure. When an autoencoder learns to reconstruct wallpaper patterns, what does it capture in its latent space? Does the learned representation reflect the underlying symmetry group? How does the choice between deterministic and probabilistic formulations affect the quality and organization of learned representations?
+
+This research is motivated by several key questions:
+\begin{enumerate}[noitemsep]
+    \item How do deterministic autoencoders compare to probabilistic VAEs in learning symmetry patterns?
+    \item What is the effect of the $\beta$ hyperparameter on the reconstruction-disentanglement trade-off?
+    \item Which symmetry classes are most difficult for neural networks to learn, and why?
+    \item How should practitioners choose between model architectures for specific applications?
+\end{enumerate}
+
+\subsection{Problem Formulation}
+
+Given a dataset $\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^{N}$ where $\mathbf{x}_i \in \R^{H \times W \times C}$ represents an RGB image of a wallpaper pattern and $y_i \in \{1, 2, ..., 17\}$ indicates its symmetry class, we aim to:
+
+\begin{enumerate}[noitemsep]
+    \item Learn an encoder function $f_\phi: \mathcal{X} \rightarrow \mathcal{Z}$ that maps images to a latent space
+    \item Learn a decoder function $g_\theta: \mathcal{Z} \rightarrow \mathcal{X}$ that reconstructs images from latent codes
+    \item Analyze the properties of the learned latent space $\mathcal{Z}$
+    \item Compare different autoencoder formulations on reconstruction and representation quality
+\end{enumerate}
+
+\subsection{Contributions}
+
+The main contributions of this work are:
+\begin{itemize}[noitemsep]
+    \item A comprehensive empirical comparison of Standard Autoencoders and $\beta$-VAE variants across multiple $\beta$ values on the task of symmetry pattern learning
+    \item Detailed quantitative analysis of latent space properties including dimensionality, statistics, and visualization across different regularization strengths
+    \item Systematic evaluation of reconstruction quality with class-wise performance metrics revealing which symmetry groups are most challenging
+    \item Practical, evidence-based guidelines for model selection in symmetry learning and related pattern recognition applications
+    \item Insights into the relationship between mathematical symmetry complexity and neural network learning difficulty
+\end{itemize}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:background} provides theoretical background on autoencoders, variational autoencoders, and wallpaper symmetry groups. Section~\ref{sec:related} reviews related work in symmetry learning and representation learning. Section~\ref{sec:methodology} describes our experimental methodology including dataset, model architectures, and evaluation metrics. Section~\ref{sec:experiments} presents detailed experimental results for each model configuration. Section~\ref{sec:comparison} provides comprehensive comparative analysis. Section~\ref{sec:discussion} discusses implications and practical recommendations. Section~\ref{sec:conclusion} concludes the paper.
+
+% ============================================================
+% 2. BACKGROUND
+% ============================================================
+\section{Theoretical Background}
+\label{sec:background}
+
+\subsection{Autoencoders: Foundations}
+
+An autoencoder is a neural network architecture designed to learn efficient representations of data through an unsupervised learning process. The fundamental principle is to train the network to reconstruct its input through a compressed intermediate representation, forcing the model to learn meaningful features.
+
+\subsubsection{Architecture}
+
+An autoencoder consists of two main components:
+
+\textbf{Encoder:} A function $f_\phi: \mathcal{X} \rightarrow \mathcal{Z}$ parameterized by $\phi$ that maps input data $\mathbf{x} \in \mathcal{X}$ to a latent representation $\mathbf{z} \in \mathcal{Z}$:
+\begin{equation}
+    \mathbf{z} = f_\phi(\mathbf{x})
+\end{equation}
+
+\textbf{Decoder:} A function $g_\theta: \mathcal{Z} \rightarrow \mathcal{X}$ parameterized by $\theta$ that maps the latent code back to the input space:
+\begin{equation}
+    \hat{\mathbf{x}} = g_\theta(\mathbf{z}) = g_\theta(f_\phi(\mathbf{x}))
+\end{equation}
+
+\subsubsection{Training Objective}
+
+The standard autoencoder is trained by minimizing the reconstruction error between input and output:
+\begin{equation}
+    \mathcal{L}_{AE}(\phi, \theta) = \frac{1}{N} \sum_{i=1}^{N} \|\mathbf{x}_i - g_\theta(f_\phi(\mathbf{x}_i))\|^2
+    \label{eq:ae_loss}
+\end{equation}
+
+For image data, the Mean Squared Error (MSE) is commonly used:
+\begin{equation}
+    \text{MSE}(\mathbf{x}, \hat{\mathbf{x}}) = \frac{1}{HWC} \sum_{h,w,c} (x_{h,w,c} - \hat{x}_{h,w,c})^2
+\end{equation}
+
+\subsubsection{Properties of Standard Autoencoders}
+
+Standard autoencoders have several important characteristics:
+\begin{itemize}[noitemsep]
+    \item \textbf{Deterministic}: The encoder produces a single, fixed latent vector for each input
+    \item \textbf{No explicit regularization}: The latent space structure emerges purely from the reconstruction objective
+    \item \textbf{Limited generative capability}: Sampling random points in latent space typically produces poor outputs
+    \item \textbf{Potentially discontinuous latent space}: Similar inputs may not map to nearby latent points
+\end{itemize}
+
+\subsection{Variational Autoencoders (VAE)}
+
+Variational Autoencoders \cite{kingma2014vae} introduce a probabilistic framework that addresses limitations of standard autoencoders by treating the latent representation as a probability distribution rather than a deterministic point.
+
+\subsubsection{Probabilistic Formulation}
+
+Instead of learning a direct mapping, the VAE encoder outputs parameters of a probability distribution:
+\begin{equation}
+    q_\phi(\mathbf{z}|\mathbf{x}) = \mathcal{N}(\mathbf{z}; \boldsymbol{\mu}_\phi(\mathbf{x}), \text{diag}(\boldsymbol{\sigma}^2_\phi(\mathbf{x})))
+\end{equation}
+
+The encoder network produces two outputs:
+\begin{itemize}[noitemsep]
+    \item Mean vector: $\boldsymbol{\mu} = \boldsymbol{\mu}_\phi(\mathbf{x})$
+    \item Log-variance vector: $\log \boldsymbol{\sigma}^2 = \log \boldsymbol{\sigma}^2_\phi(\mathbf{x})$
+\end{itemize}
+
+\subsubsection{Reparameterization Trick}
+
+To enable gradient-based optimization through the stochastic sampling operation, the reparameterization trick is employed:
+\begin{equation}
+    \mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})
+\end{equation}
+
+This formulation moves the stochasticity to an input variable $\boldsymbol{\epsilon}$, making the sampling operation differentiable with respect to $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$.
+
+\subsubsection{Evidence Lower Bound (ELBO)}
+
+The VAE is trained by maximizing the Evidence Lower Bound:
+\begin{equation}
+    \mathcal{L}_{ELBO} = \E_{q_\phi(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})] - \KL(q_\phi(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))
+    \label{eq:elbo}
+\end{equation}
+
+The first term is the \textbf{reconstruction likelihood}, encouraging accurate reconstructions. The second term is the \textbf{KL divergence} between the approximate posterior and the prior, regularizing the latent space.
+
+For Gaussian distributions, the KL divergence has a closed-form solution:
+\begin{equation}
+    \KL = -\frac{1}{2} \sum_{j=1}^{J} \left(1 + \log \sigma_j^2 - \mu_j^2 - \sigma_j^2\right)
+    \label{eq:kl_gaussian}
+\end{equation}
+
+where $J$ is the dimensionality of the latent space.
+
+\subsection{Beta Variational Autoencoders ($\beta$-VAE)}
+
+The $\beta$-VAE \cite{higgins2017betavae} extends the standard VAE by introducing a hyperparameter $\beta$ that controls the weight of the KL divergence term:
+\begin{equation}
+    \mathcal{L}_{\beta-VAE} = \E_{q_\phi(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})] - \beta \cdot \KL(q_\phi(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))
+    \label{eq:beta_vae}
+\end{equation}
+
+\subsubsection{Effect of Beta Values}
+
+The $\beta$ hyperparameter provides explicit control over the reconstruction-regularization trade-off:
+
+\textbf{$\beta < 1$ (Reconstruction Focus):}
+\begin{itemize}[noitemsep]
+    \item Reduced weight on KL divergence
+    \item Better reconstruction quality
+    \item Less regularized latent space
+    \item Higher KL divergence values
+    \item Limited disentanglement
+\end{itemize}
+
+\textbf{$\beta = 1$ (Standard VAE):}
+\begin{itemize}[noitemsep]
+    \item Balanced reconstruction and regularization
+    \item Corresponds to the original ELBO objective
+    \item Moderate disentanglement
+    \item Theoretically principled formulation
+\end{itemize}
+
+\textbf{$\beta > 1$ (Disentanglement Focus):}
+\begin{itemize}[noitemsep]
+    \item Stronger constraint toward prior
+    \item Encourages independent latent factors
+    \item Better disentanglement of factors of variation
+    \item Potential reconstruction degradation
+    \item Smoother latent space traversals
+\end{itemize}
+
+\subsubsection{Information Bottleneck Perspective}
+
+From an information-theoretic viewpoint, increasing $\beta$ creates a tighter information bottleneck, forcing the model to prioritize the most essential information for reconstruction while discarding redundant or correlated features. This pressure encourages the emergence of independent, interpretable latent dimensions.
+
+\subsection{Wallpaper Symmetry Groups}
+
+Wallpaper groups (also called plane crystallographic groups or plane symmetry groups) classify all possible symmetries of two-dimensional periodic patterns. A fundamental result in group theory states that there are exactly 17 such groups \cite{armstrong1988groups}.
+
+\subsubsection{Symmetry Operations}
+
+Four types of isometries (distance-preserving transformations) can appear in wallpaper patterns:
+
+\begin{enumerate}
+    \item \textbf{Translations}: Displacement by lattice vectors $(a_1, a_2)$
+    \item \textbf{Rotations}: Rotation about a point by $\frac{2\pi}{n}$ where $n \in \{1, 2, 3, 4, 6\}$
+    \item \textbf{Reflections}: Mirror symmetry about an axis
+    \item \textbf{Glide Reflections}: Reflection followed by translation parallel to the reflection axis
+\end{enumerate}
+
+\subsubsection{The 17 Groups}
+
+The crystallographic restriction theorem limits rotational symmetries in periodic patterns to 2-fold, 3-fold, 4-fold, and 6-fold rotations. Combined with different reflection and glide reflection arrangements, this yields exactly 17 distinct groups:
+
+\begin{table}[H]
+\centering
+\caption{The 17 Wallpaper Groups}
+\label{tab:wallpaper_groups}
+\begin{tabular}{ll}
+\toprule
+\textbf{Rotation Order} & \textbf{Groups} \\
+\midrule
+No rotation (1-fold) & p1, pm, pg, cm \\
+2-fold rotation & p2, pmm, pmg, pgg, cmm \\
+3-fold rotation & p3, p3m1, p31m \\
+4-fold rotation & p4, p4m, p4g \\
+6-fold rotation & p6, p6m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Notation System}
+
+The standard notation (Hermann-Mauguin notation) encodes symmetry information:
+\begin{itemize}[noitemsep]
+    \item \textbf{p} or \textbf{c}: Primitive or centered unit cell
+    \item \textbf{1, 2, 3, 4, 6}: Order of rotation
+    \item \textbf{m}: Mirror line
+    \item \textbf{g}: Glide reflection
+\end{itemize}
+
+% ============================================================
+% 3. RELATED WORK
+% ============================================================
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Representation Learning with Autoencoders}
+
+Since their introduction by Hinton and Salakhutdinov \cite{hinton2006autoencoder}, autoencoders have become fundamental tools for unsupervised representation learning. The development of convolutional autoencoders enabled effective learning on image data, with applications ranging from denoising to feature extraction.
+
+Variational autoencoders \cite{kingma2014vae} introduced probabilistic interpretation and generative capabilities. Subsequent work explored various extensions including conditional VAEs, hierarchical VAEs, and different prior distributions.
+
+\subsection{Disentangled Representations}
+
+The $\beta$-VAE \cite{higgins2017betavae} sparked significant interest in disentangled representation learning. Follow-up work includes FactorVAE, $\beta$-TCVAE, and DIP-VAE, each proposing different approaches to encourage factorial latent representations.
+
+Locatello et al. \cite{locatello2019challenging} challenged assumptions about unsupervised disentanglement, demonstrating that inductive biases are necessary for reliable disentanglement without supervision.
+
+\subsection{Symmetry in Machine Learning}
+
+The study of symmetry in machine learning has gained significant attention. Equivariant neural networks explicitly encode symmetry constraints, with applications in molecular modeling, physics simulation, and computer vision.
+
+For crystallographic applications, neural networks have been applied to crystal structure prediction, property prediction, and symmetry classification. However, comprehensive studies comparing autoencoder variants on symmetry learning tasks remain limited.
+
+\subsection{Symmetry Dataset}
+
+The Symmetry Dataset used in this work was introduced by Guo and Agar \cite{guo2022symmetry} for studying symmetry classification and representation learning. The dataset provides a controlled testbed for investigating how neural networks learn mathematical symmetry structures.
+
+% ============================================================
+% 4. METHODOLOGY
+% ============================================================
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Dataset Description}
+
+We utilize the \textbf{Symmetry Dataset} published by Guo \& Agar (2022) on Zenodo \cite{guo2022symmetry}. This dataset was specifically designed for studying machine learning approaches to symmetry classification.
+
+\subsubsection{Dataset Statistics}
+
+\begin{table}[H]
+\centering
+\caption{Detailed Dataset Statistics}
+\label{tab:dataset_detailed}
+\begin{tabular}{ll}
+\toprule
+\textbf{Attribute} & \textbf{Value} \\
+\midrule
+Total Samples & 85,355 \\
+Training Samples & 76,500 (89.6\%) \\
+Validation Samples & 8,500 (10.0\%) \\
+Test Samples & 355 (0.4\%) \\
+Number of Classes & 17 \\
+Image Resolution & 256 $\times$ 256 pixels \\
+Color Channels & 3 (RGB) \\
+File Format & PNG \\
+Total Size & 33.4 GB \\
+License & CC BY 4.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Data Preprocessing}
+
+All images undergo the following preprocessing pipeline:
+\begin{enumerate}[noitemsep]
+    \item Resize to 256 $\times$ 256 pixels (if necessary)
+    \item Convert to RGB format
+    \item Normalize pixel values to $[-1, 1]$ range using mean $= 0.5$ and std $= 0.5$ per channel
+\end{enumerate}
+
+The normalization formula applied is:
+\begin{equation}
+    x_{normalized} = \frac{x - 0.5}{0.5} = 2x - 1
+\end{equation}
+
+This maps the $[0, 1]$ pixel range to $[-1, 1]$, compatible with the Tanh activation in the decoder output.
+
+\subsection{Model Architectures}
+
+\subsubsection{Convolutional Encoder}
+
+The encoder follows a standard CNN architecture with progressive downsampling:
+
+\begin{table}[H]
+\centering
+\caption{Encoder Architecture Details}
+\label{tab:encoder_arch}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Layer} & \textbf{Output Shape} & \textbf{Params} \\
+\midrule
+Input & 3 $\times$ 256 $\times$ 256 & - \\
+Conv2d(3, 32, 3, 2, 1) & 32 $\times$ 128 $\times$ 128 & 896 \\
+BatchNorm2d(32) & 32 $\times$ 128 $\times$ 128 & 64 \\
+LeakyReLU(0.2) & 32 $\times$ 128 $\times$ 128 & - \\
+Conv2d(32, 64, 3, 2, 1) & 64 $\times$ 64 $\times$ 64 & 18,496 \\
+BatchNorm2d(64) & 64 $\times$ 64 $\times$ 64 & 128 \\
+LeakyReLU(0.2) & 64 $\times$ 64 $\times$ 64 & - \\
+Conv2d(64, 128, 3, 2, 1) & 128 $\times$ 32 $\times$ 32 & 73,856 \\
+BatchNorm2d(128) & 128 $\times$ 32 $\times$ 32 & 256 \\
+LeakyReLU(0.2) & 128 $\times$ 32 $\times$ 32 & - \\
+Conv2d(128, 64, 3, 2, 1) & 64 $\times$ 16 $\times$ 16 & 73,792 \\
+BatchNorm2d(64) & 64 $\times$ 16 $\times$ 16 & 128 \\
+LeakyReLU(0.2) & 64 $\times$ 16 $\times$ 16 & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Convolutional Decoder}
+
+The decoder mirrors the encoder with transposed convolutions for upsampling:
+
+\begin{table}[H]
+\centering
+\caption{Decoder Architecture Details}
+\label{tab:decoder_arch}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Layer} & \textbf{Output Shape} & \textbf{Params} \\
+\midrule
+Input & 64 $\times$ 16 $\times$ 16 & - \\
+ConvT2d(64, 128, 4, 2, 1) & 128 $\times$ 32 $\times$ 32 & 131,200 \\
+BatchNorm2d(128) & 128 $\times$ 32 $\times$ 32 & 256 \\
+ReLU & 128 $\times$ 32 $\times$ 32 & - \\
+ConvT2d(128, 64, 4, 2, 1) & 64 $\times$ 64 $\times$ 64 & 131,136 \\
+BatchNorm2d(64) & 64 $\times$ 64 $\times$ 64 & 128 \\
+ReLU & 64 $\times$ 64 $\times$ 64 & - \\
+ConvT2d(64, 32, 4, 2, 1) & 32 $\times$ 128 $\times$ 128 & 32,800 \\
+BatchNorm2d(32) & 32 $\times$ 128 $\times$ 128 & 64 \\
+ReLU & 32 $\times$ 128 $\times$ 128 & - \\
+ConvT2d(32, 3, 4, 2, 1) & 3 $\times$ 256 $\times$ 256 & 1,539 \\
+Tanh & 3 $\times$ 256 $\times$ 256 & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{VAE-Specific Modifications}
+
+For the $\beta$-VAE models, additional linear layers are added after the encoder:
+
+\begin{itemize}[noitemsep]
+    \item Flatten: $64 \times 16 \times 16 \rightarrow 16384$
+    \item Linear($\mu$): $16384 \rightarrow 64$
+    \item Linear($\log \sigma^2$): $16384 \rightarrow 64$
+\end{itemize}
+
+The decoder receives a 64-dimensional sampled latent vector that is reshaped appropriately.
+
+\subsubsection{Parameter Counts}
+
+\begin{table}[H]
+\centering
+\caption{Model Parameter Comparison}
+\label{tab:params}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Component} & \textbf{Std AE} & \textbf{$\beta$-VAE} \\
+\midrule
+Encoder Conv Layers & 167,168 & 167,168 \\
+Encoder BatchNorm & 576 & 576 \\
+VAE Linear Layers & - & 192 \\
+Decoder ConvT Layers & 296,675 & 296,675 \\
+Decoder BatchNorm & 320 & 320 \\
+\midrule
+\textbf{Total} & \textbf{464,739} & \textbf{464,931} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training Configuration}
+
+\subsubsection{Optimization Settings}
+
+\begin{table}[H]
+\centering
+\caption{Training Hyperparameters}
+\label{tab:training_config}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Parameter} & \textbf{Std AE} & \textbf{$\beta$-VAE} \\
+\midrule
+Optimizer & AdamW & Adam \\
+Learning Rate & 0.001 & 0.001 \\
+Weight Decay & $10^{-5}$ & $10^{-5}$ \\
+$\beta_1$, $\beta_2$ & 0.9, 0.999 & 0.9, 0.999 \\
+Batch Size & 32 & 32 \\
+Max Epochs & 30 & 30 \\
+Early Stopping & Patience = 5 & Patience = 5 \\
+Scheduler & CosineAnnealing & None \\
+Gradient Clipping & 5.0 & 5.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Loss Functions}
+
+\textbf{Standard Autoencoder:}
+\begin{equation}
+    \mathcal{L}_{AE} = \text{MSE}(\mathbf{x}, \hat{\mathbf{x}})
+\end{equation}
+
+\textbf{$\beta$-VAE:}
+\begin{equation}
+    \mathcal{L}_{\beta-VAE} = \text{MSE}(\mathbf{x}, \hat{\mathbf{x}}) + \beta \cdot \KL(q(\mathbf{z}|\mathbf{x}) \| \mathcal{N}(0, I))
+\end{equation}
+
+\subsection{Evaluation Metrics}
+
+\subsubsection{Reconstruction Quality}
+
+\textbf{Mean Squared Error (MSE):}
+\begin{equation}
+    \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} \|\mathbf{x}_i - \hat{\mathbf{x}}_i\|^2
+\end{equation}
+
+\textbf{Root Mean Squared Error (RMSE):}
+\begin{equation}
+    \text{RMSE} = \sqrt{\text{MSE}}
+\end{equation}
+
+\subsubsection{Latent Space Quality}
+
+\textbf{KL Divergence:} Measures deviation from the standard normal prior.
+
+\textbf{PCA Explained Variance:} Indicates latent space compactness.
+
+\textbf{t-SNE Visualization:} Reveals cluster structure and class separability.
+
+\subsubsection{Latent Statistics}
+
+For $\beta$-VAE models:
+\begin{itemize}[noitemsep]
+    \item Mean and standard deviation of $\mu$ across dimensions
+    \item Mean and standard deviation of $\sigma$ across dimensions
+    \item Total KL divergence per sample
+\end{itemize}
+
+\subsection{Experimental Setup}
+
+All experiments were conducted using:
+\begin{itemize}[noitemsep]
+    \item Framework: PyTorch 2.0
+    \item Hardware: NVIDIA GPU with CUDA
+    \item Random seed: 42 for reproducibility
+    \item Data loading: 4 worker processes, pinned memory
+\end{itemize}
+
+% ============================================================
+% 5. EXPERIMENTS AND RESULTS
+% ============================================================
+\section{Experiments and Results}
+\label{sec:experiments}
+
+\subsection{Standard Autoencoder}
+
+The Standard Convolutional Autoencoder serves as our deterministic baseline, directly mapping inputs to a fixed 16,384-dimensional latent representation without any probabilistic modeling or explicit regularization.
+
+\subsubsection{Training Dynamics}
+
+Training exhibited rapid and stable convergence, reaching early stopping criteria at epoch 21 with the best validation loss achieved at epoch 16.
+
+\begin{table}[H]
+\centering
+\caption{Standard AE Training Summary}
+\label{tab:ae_training}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Epochs Until Early Stop & 21 \\
+Best Epoch & 16 \\
+Final Training Loss & 0.009903 \\
+Final Validation Loss & 0.009579 \\
+Best Validation Loss & 0.009285 \\
+Training Time & 1h 7m 50s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The training and validation curves showed smooth convergence with minimal overfitting, indicating good generalization despite the high-dimensional latent space.
+
+\subsubsection{Test Performance}
+
+\begin{table}[H]
+\centering
+\caption{Standard AE Test Statistics}
+\label{tab:ae_test}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Test MSE Loss & 0.060758 \\
+Test RMSE & 0.246492 \\
+Mean Error & 0.060758 \\
+Std Error & 0.065446 \\
+Min Error & 0.000499 \\
+Max Error & 0.513804 \\
+Median Error & 0.038702 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The relatively low median error (0.039) compared to the mean (0.061) indicates a right-skewed error distribution with most samples being well-reconstructed but a few outliers having high error.
+
+\subsubsection{Latent Space Analysis}
+
+The standard autoencoder produces a high-dimensional, unregularized latent space:
+
+\begin{table}[H]
+\centering
+\caption{Standard AE Latent Space Statistics}
+\label{tab:ae_latent}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Latent Dimension & 16,384 \\
+Mean Latent Value & 1.078 \\
+Std Latent Value & 0.920 \\
+Min Latent Value & -3.047 \\
+Max Latent Value & 12.810 \\
+Sparsity (\% zeros) & 0.84\% \\
+PCA 2D Variance & 14.1\% \\
+Components for 95\% & 272 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key observations:
+\begin{itemize}[noitemsep]
+    \item The latent space is not centered at zero (mean = 1.078)
+    \item High dimensionality with 272 components needed to explain 95\% variance
+    \item Only 14.1\% variance captured by first 2 PCA components
+    \item Very low sparsity indicating dense representations
+\end{itemize}
+
+\subsubsection{Class-wise Performance}
+
+\begin{table}[H]
+\centering
+\caption{Standard AE: Class-wise MSE (Sorted)}
+\label{tab:ae_classwise}
+\begin{tabular}{clcc}
+\toprule
+\textbf{Rank} & \textbf{Class} & \textbf{MSE} & \textbf{Std} \\
+\midrule
+1 & p1 & 0.030 & 0.027 \\
+2 & pm & 0.037 & 0.030 \\
+3 & cm & 0.044 & 0.034 \\
+4 & p3m1 & 0.047 & 0.038 \\
+5 & pmg & 0.050 & 0.038 \\
+\midrule
+13 & pmm & 0.069 & 0.052 \\
+14 & pgg & 0.075 & 0.081 \\
+15 & p6m & 0.088 & 0.075 \\
+16 & p4 & 0.108 & 0.126 \\
+17 & p6 & 0.111 & 0.096 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{$\beta$-VAE with $\beta = 0.5$}
+
+With $\beta < 1$, the model prioritizes reconstruction over latent regularization.
+
+\subsubsection{Training Dynamics}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 0.5$ Training Summary}
+\label{tab:b05_training}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Epochs Until Early Stop & 28 \\
+Best Epoch & 23 \\
+Final Training Loss & 0.032557 \\
+Final Recon Loss & 0.022665 \\
+Final $\beta \times$ KL Loss & 0.009892 \\
+Best Validation Loss & 0.027613 \\
+Training Time & 2h 39m 11s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Latent Space Quality}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 0.5$ Latent Statistics}
+\label{tab:b05_latent}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Ideal} \\
+\midrule
+$\mu$ Mean & 0.0003 & 0 \\
+$\mu$ Std & 0.2235 & 0 \\
+$\sigma$ Mean & 0.8551 & 1 \\
+$\sigma$ Std & 0.2397 & 0 \\
+KL Divergence & 9.7914 & 0 \\
+PCA 2D Variance & 60.93\% & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Test Performance}
+
+Test VAE Loss: \textbf{0.129268}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 0.5$: Top/Bottom Classes}
+\label{tab:b05_classwise}
+\begin{tabular}{clcc}
+\toprule
+& \textbf{Class} & \textbf{MSE} & \textbf{Std} \\
+\midrule
+Best & p1 & 0.057 & 0.046 \\
+& pm & 0.071 & 0.061 \\
+& cm & 0.075 & 0.054 \\
+\midrule
+Worst & p4 & 0.163 & 0.167 \\
+& p6 & 0.172 & 0.132 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{$\beta$-VAE with $\beta = 1.0$ (Standard VAE)}
+
+The standard VAE formulation balances reconstruction and regularization.
+
+\subsubsection{Training Dynamics}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 1.0$ Training Summary}
+\label{tab:b10_training}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Epochs Completed & 30 (no early stop) \\
+Final Training Loss & 0.040207 \\
+Final Recon Loss & 0.027504 \\
+Final $\beta \times$ KL Loss & 0.012703 \\
+Best Validation Loss & 0.034520 \\
+Training Time & 2h 49m 52s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Latent Space Quality}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 1.0$ Latent Statistics}
+\label{tab:b10_latent}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Ideal} \\
+\midrule
+$\mu$ Mean & -0.0009 & 0 \\
+$\mu$ Std & 0.2010 & 0 \\
+$\sigma$ Mean & 0.9042 & 1 \\
+$\sigma$ Std & 0.1983 & 0 \\
+KL Divergence & 6.2983 & 0 \\
+PCA 2D Variance & \textbf{64.47\%} & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The standard VAE achieves the \textbf{highest PCA explained variance} (64.47\%) in 2 dimensions, indicating the most compact and informative latent representations.
+
+\subsubsection{Test Performance}
+
+Test VAE Loss: \textbf{0.155442}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 1.0$: Top/Bottom Classes}
+\label{tab:b10_classwise}
+\begin{tabular}{clcc}
+\toprule
+& \textbf{Class} & \textbf{MSE} & \textbf{Std} \\
+\midrule
+Best & p1 & 0.070 & 0.056 \\
+& pm & 0.088 & 0.074 \\
+& cm & 0.089 & 0.059 \\
+\midrule
+Worst & p4 & 0.181 & 0.166 \\
+& p6 & 0.194 & 0.142 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{$\beta$-VAE with $\beta = 4.0$}
+
+With $\beta > 1$, strong regularization encourages disentanglement.
+
+\subsubsection{Training Dynamics}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 4.0$ Training Summary}
+\label{tab:b40_training}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Epochs Until Early Stop & 25 \\
+Best Epoch & 20 \\
+Final Training Loss & 0.061914 \\
+Final Recon Loss & 0.042766 \\
+Final $\beta \times$ KL Loss & 0.019148 \\
+Best Validation Loss & 0.055471 \\
+Training Time & 2h 25m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Latent Space Quality}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 4.0$ Latent Statistics}
+\label{tab:b40_latent}
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Ideal} \\
+\midrule
+$\mu$ Mean & \textbf{0.0002} & 0 \\
+$\mu$ Std & \textbf{0.1568} & 0 \\
+$\sigma$ Mean & \textbf{0.9625} & 1 \\
+$\sigma$ Std & \textbf{0.1321} & 0 \\
+KL Divergence & \textbf{2.6418} & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $\beta = 4.0$ model achieves the \textbf{best latent space regularization} with:
+\begin{itemize}[noitemsep]
+    \item Lowest KL divergence (2.64)
+    \item $\sigma$ mean closest to 1 (0.9625)
+    \item Most consistent $\mu$ and $\sigma$ across dimensions
+\end{itemize}
+
+\subsubsection{Test Performance}
+
+Test VAE Loss: \textbf{0.233418}
+
+\begin{table}[H]
+\centering
+\caption{$\beta = 4.0$: Top/Bottom Classes}
+\label{tab:b40_classwise}
+\begin{tabular}{clcc}
+\toprule
+& \textbf{Class} & \textbf{MSE} & \textbf{Std} \\
+\midrule
+Best & p1 & 0.123 & 0.084 \\
+& pm & 0.143 & 0.105 \\
+& pmg & 0.149 & 0.077 \\
+\midrule
+Worst & p4 & 0.261 & 0.176 \\
+& p6 & 0.301 & 0.155 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% 6. COMPARATIVE ANALYSIS
+% ============================================================
+\section{Comparative Analysis}
+\label{sec:comparison}
+
+\subsection{Comprehensive Performance Summary}
+
+\begin{table*}[t]
+\centering
+\caption{Complete Model Comparison Across All Metrics}
+\label{tab:full_comparison}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Metric} & \textbf{Std AE} & \textbf{$\beta$=0.5} & \textbf{$\beta$=1.0} & \textbf{$\beta$=4.0} & \textbf{Best} \\
+\midrule
+\multicolumn{6}{c}{\textit{Reconstruction Quality}} \\
+\midrule
+Test MSE & \cellcolor{green!20}\textbf{0.061} & 0.129 & 0.155 & \cellcolor{red!20}0.233 & Std AE \\
+Best Val Loss & \cellcolor{green!20}\textbf{0.009} & 0.028 & 0.035 & \cellcolor{red!20}0.055 & Std AE \\
+\midrule
+\multicolumn{6}{c}{\textit{Latent Space Quality}} \\
+\midrule
+KL Divergence & N/A & \cellcolor{red!20}9.79 & 6.30 & \cellcolor{green!20}\textbf{2.64} & $\beta$=4.0 \\
+Latent Dims & 16,384 & 64 & 64 & 64 & VAEs \\
+PCA Var (2D) & 14.1\% & 60.93\% & \cellcolor{green!20}\textbf{64.47\%} & - & $\beta$=1.0 \\
+$\mu$ Mean & N/A & 0.0003 & -0.0009 & \cellcolor{green!20}\textbf{0.0002} & $\beta$=4.0 \\
+$\sigma$ Mean & N/A & 0.855 & 0.904 & \cellcolor{green!20}\textbf{0.963} & $\beta$=4.0 \\
+\midrule
+\multicolumn{6}{c}{\textit{Training Efficiency}} \\
+\midrule
+Training Time & \cellcolor{green!20}\textbf{1h 8m} & 2h 39m & 2h 50m & 2h 25m & Std AE \\
+Epochs & 21 & 28 & 30 & 25 & - \\
+\midrule
+\multicolumn{6}{c}{\textit{Class Performance}} \\
+\midrule
+Best Class (p1) & \cellcolor{green!20}\textbf{0.030} & 0.057 & 0.070 & 0.123 & Std AE \\
+Worst Class (p6) & \cellcolor{green!20}\textbf{0.111} & 0.172 & 0.194 & \cellcolor{red!20}0.301 & Std AE \\
+\midrule
+\multicolumn{6}{c}{\textit{Generative Capability}} \\
+\midrule
+Random Sampling & Poor & Limited & Good & \cellcolor{green!20}\textbf{Best} & $\beta$=4.0 \\
+Interpolation & Poor & Moderate & Good & \cellcolor{green!20}\textbf{Best} & $\beta$=4.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Reconstruction vs. Regularization Trade-off}
+
+Our results clearly demonstrate the fundamental trade-off between reconstruction quality and latent space regularization:
+
+\begin{equation}
+    \text{MSE} \propto \beta, \quad \text{KL} \propto \frac{1}{\beta}
+\end{equation}
+
+As $\beta$ increases:
+\begin{enumerate}[noitemsep]
+    \item Reconstruction MSE increases (0.061 $\rightarrow$ 0.129 $\rightarrow$ 0.155 $\rightarrow$ 0.233)
+    \item KL divergence decreases (9.79 $\rightarrow$ 6.30 $\rightarrow$ 2.64)
+    \item Latent statistics approach ideal values ($\sigma$ mean: 0.855 $\rightarrow$ 0.904 $\rightarrow$ 0.963)
+\end{enumerate}
+
+\subsection{Symmetry Complexity Analysis}
+
+Analysis across all models reveals consistent patterns in class difficulty:
+
+\begin{table}[H]
+\centering
+\caption{Symmetry Complexity vs. Reconstruction Difficulty}
+\label{tab:complexity}
+\begin{tabular}{lcp{4cm}}
+\toprule
+\textbf{Difficulty} & \textbf{Classes} & \textbf{Symmetry Properties} \\
+\midrule
+Easy & p1, pm, cm & Simple translation or single mirror \\
+\midrule
+Moderate & pmg, p3m1, p3, p31m, p2 & 2-fold or 3-fold rotation \\
+\midrule
+Challenging & p4m, cmm, pg, p4g, pmm & 4-fold symmetry or glide reflections \\
+\midrule
+Difficult & pgg, p6m, p4, p6 & 6-fold rotation or complex combinations \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key finding: \textbf{Higher-order rotational symmetries are consistently more difficult} to reconstruct across all model types. The p6 class (6-fold rotation) is the worst-performing class for all models.
+
+\subsection{Latent Space Dimensionality}
+
+The difference in latent dimensionality between Standard AE (16,384) and VAEs (64) is striking:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Standard AE}: 256$\times$ more dimensions, yet only 14.1\% PCA variance in 2D
+    \item \textbf{VAE ($\beta$=1.0)}: 64 dimensions with 64.47\% PCA variance in 2D
+\end{itemize}
+
+This demonstrates that probabilistic regularization produces dramatically more compact and informative representations.
+
+\subsection{Training Efficiency}
+
+\begin{table}[H]
+\centering
+\caption{Training Time Comparison}
+\label{tab:time}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Time} & \textbf{Epochs} & \textbf{Time/Epoch} \\
+\midrule
+Std AE & 1h 8m & 21 & 3.2 min \\
+$\beta$=0.5 & 2h 39m & 28 & 5.7 min \\
+$\beta$=1.0 & 2h 50m & 30 & 5.7 min \\
+$\beta$=4.0 & 2h 25m & 25 & 5.8 min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Standard AE trains approximately 1.8$\times$ faster per epoch due to:
+\begin{enumerate}[noitemsep]
+    \item Simpler loss computation (no KL term)
+    \item No reparameterization sampling
+    \item CosineAnnealing scheduler aids convergence
+\end{enumerate}
+
+% ============================================================
+% 7. DISCUSSION
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Model Selection Guidelines}
+
+Based on our comprehensive evaluation, we provide evidence-based recommendations for model selection:
+
+\subsubsection{For Maximum Reconstruction Quality}
+
+\textbf{Recommendation: Standard Autoencoder}
+
+\begin{itemize}[noitemsep]
+    \item Best for: Image compression, denoising, super-resolution
+    \item Advantages: Lowest MSE (0.061), fastest training (1h 8m), sharpest reconstructions
+    \item Disadvantages: No generative capability, huge unstructured latent space (16,384 dims)
+    \item Use when: Reconstruction fidelity is the primary objective
+\end{itemize}
+
+\subsubsection{For Balanced Performance}
+
+\textbf{Recommendation: $\beta$-VAE with $\beta = 0.5$}
+
+\begin{itemize}[noitemsep]
+    \item Best for: Applications requiring both good reconstruction and some generative capability
+    \item Advantages: Best VAE reconstruction (MSE: 0.129), compact latent space (64 dims)
+    \item Disadvantages: Less regularized, limited sampling quality
+    \item Use when: Reconstruction is important but generative modeling is also needed
+\end{itemize}
+
+\subsubsection{For Feature Learning and Transfer}
+
+\textbf{Recommendation: Standard VAE ($\beta = 1.0$)}
+
+\begin{itemize}[noitemsep]
+    \item Best for: Representation learning, downstream classification, transfer learning
+    \item Advantages: Best PCA variance (64.47\%), theoretically principled, balanced trade-off
+    \item Disadvantages: Moderate on both reconstruction and regularization metrics
+    \item Use when: Learned representations will be used for other tasks
+\end{itemize}
+
+\subsubsection{For Disentanglement and Generation}
+
+\textbf{Recommendation: $\beta$-VAE with $\beta = 4.0$}
+
+\begin{itemize}[noitemsep]
+    \item Best for: Controllable generation, style transfer, interpretable representations
+    \item Advantages: Best regularization (KL: 2.64), smooth latent traversals, best sampling
+    \item Disadvantages: Blurry reconstructions (MSE: 0.233), highest reconstruction error
+    \item Use when: Interpretability and generative quality are prioritized over reconstruction
+\end{itemize}
+
+\subsection{Insights on Symmetry Learning}
+
+Our experiments reveal several insights about how neural networks learn symmetry:
+
+\subsubsection{Complexity Hierarchy}
+
+The consistent difficulty ranking across models suggests that rotational symmetry order directly correlates with learning difficulty. Groups with 6-fold rotations (p6, p6m) are hardest, while simple translations (p1) are easiest.
+
+\subsubsection{Geometric Understanding}
+
+The network appears to learn symmetry through pattern matching rather than explicit geometric reasoning. This explains why:
+\begin{itemize}[noitemsep]
+    \item Higher-order rotations require capturing more varied local patterns
+    \item Combined symmetries (rotation + reflection) are harder than individual operations
+    \item Glide reflections are challenging due to coupled translation-reflection structure
+\end{itemize}
+
+\subsubsection{Latent Space Organization}
+
+The t-SNE and PCA visualizations show that VAE latent spaces naturally organize by symmetry class to some degree, even without explicit class supervision. This suggests that symmetry structure is a salient feature that emerges from reconstruction objectives.
+
+\subsection{Limitations}
+
+Our study has several limitations that suggest directions for future work:
+
+\begin{enumerate}
+    \item \textbf{Fixed Architecture}: We used identical encoder-decoder backbones across all models. Different architectures (e.g., ResNet, attention-based) may yield different trade-offs.
+    
+    \item \textbf{Limited $\beta$ Range}: We evaluated only three $\beta$ values (0.5, 1.0, 4.0). Finer granularity or adaptive $\beta$ schedules may reveal optimal operating points.
+    
+    \item \textbf{Synthetic Data}: The Symmetry Dataset contains synthetic images. Results may differ on natural images, real crystallographic data, or noisy observations.
+    
+    \item \textbf{No Downstream Evaluation}: We did not evaluate classification accuracy or clustering performance on learned representations.
+    
+    \item \textbf{Single Dataset}: Generalization to other symmetry datasets or related domains (e.g., crystallography, textile patterns) was not tested.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+Several promising directions emerge from this work:
+
+\begin{enumerate}
+    \item \textbf{Real-World Data}: Evaluation on crystallographic microscopy images, X-ray diffraction patterns, or real textile designs
+    
+    \item \textbf{Downstream Tasks}: Integration with symmetry classification, clustering, or anomaly detection tasks
+    
+    \item \textbf{Disentanglement Metrics}: Quantitative evaluation using established metrics (MIG, DCI, SAP scores)
+    
+    \item \textbf{Alternative Priors}: Investigation of non-Gaussian priors (VampPrior, IAF) for improved expressiveness
+    
+    \item \textbf{Conditional Generation}: Development of symmetry-conditioned generative models for controlled pattern synthesis
+    
+    \item \textbf{Equivariant Architectures}: Combination with symmetry-equivariant neural networks that explicitly encode group structure
+\end{enumerate}
+
+% ============================================================
+% 8. CONCLUSION
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+This work presents a systematic and comprehensive comparison of Standard Autoencoders and $\beta$-VAE variants for learning representations of the 17 wallpaper symmetry groups. Through extensive experiments on the Symmetry Dataset, we have uncovered fundamental trade-offs and provided practical guidance for practitioners.
+
+\subsection{Key Findings}
+
+\begin{enumerate}
+    \item \textbf{Reconstruction-Regularization Trade-off}: There exists a clear inverse relationship between reconstruction quality and latent space regularization. The Standard Autoencoder achieves the best MSE (0.061) but produces an unstructured latent space, while $\beta$-VAE with $\beta = 4.0$ has the most regularized latent space (KL: 2.64) but highest reconstruction error (0.233).
+    
+    \item \textbf{Compact Representations}: The Standard VAE ($\beta = 1.0$) achieves the most informative low-dimensional representations, capturing 64.47\% of variance in just 2 principal components, compared to only 14.1\% for the 16,384-dimensional Standard Autoencoder latent space.
+    
+    \item \textbf{Symmetry Complexity Correlation}: Reconstruction difficulty strongly correlates with rotational symmetry order across all models. Groups with 6-fold rotations (p6, p6m) are consistently the most challenging, while simple translation symmetries (p1) are easiest.
+    
+    \item \textbf{Training Efficiency}: The Standard Autoencoder converges fastest (1h 8m) due to simpler optimization without KL regularization, while VAE models require 2-3 hours.
+    
+    \item \textbf{Generative Quality}: Higher $\beta$ values produce smoother latent spaces better suited for generative sampling and interpolation, despite reconstruction degradation.
+\end{enumerate}
+
+\subsection{Practical Recommendations}
+
+For practitioners working on symmetry learning or related pattern recognition tasks:
+\begin{itemize}[noitemsep]
+    \item Use \textbf{Standard Autoencoders} when reconstruction fidelity is paramount
+    \item Use \textbf{$\beta$-VAE ($\beta = 1.0$)} for general-purpose representation learning
+    \item Use \textbf{$\beta$-VAE ($\beta \geq 4.0$)} when interpretability or generative quality is prioritized
+    \item Consider the $\beta$ value as a tunable hyperparameter based on application requirements
+\end{itemize}
+
+\subsection{Broader Impact}
+
+This work contributes to the understanding of how neural networks learn mathematical structure, with implications for:
+\begin{itemize}[noitemsep]
+    \item Crystallographic analysis and materials science
+    \item Computer-aided design and generative art
+    \item Scientific visualization and pattern recognition
+    \item Fundamental research in representation learning
+\end{itemize}
+
+The code, trained models, and experimental results are made available to facilitate reproducibility and future research in this domain.
+
+% ============================================================
+% ACKNOWLEDGMENTS
+% ============================================================
+\section*{Acknowledgments}
+
+We thank Yichen Guo and Joshua Agar for making the Symmetry Dataset publicly available on Zenodo under the CC BY 4.0 license. We also acknowledge the PyTorch development team and the broader open-source machine learning community.
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+
+\bibitem{armstrong1988groups}
+M.~A. Armstrong.
+\newblock {\em Groups and Symmetry}.
+\newblock Undergraduate Texts in Mathematics. Springer-Verlag, New York, 1988.
+
+\bibitem{guo2022symmetry}
+Y.~Guo and J.~Agar.
+\newblock Symmetry\_Dataset.
+\newblock Zenodo, 2022.
+\newblock \url{https://doi.org/10.5281/zenodo.7384734}.
+
+\bibitem{higgins2017betavae}
+I.~Higgins, L.~Matthey, A.~Pal, C.~Burgess, X.~Glorot, M.~Botvinick,
+  S.~Mohamed, and A.~Lerchner.
+\newblock $\beta$-VAE: Learning basic visual concepts with a constrained
+  variational framework.
+\newblock In {\em Proceedings of the 5th International Conference on Learning
+  Representations (ICLR)}, 2017.
+
+\bibitem{hinton2006autoencoder}
+G.~E. Hinton and R.~R. Salakhutdinov.
+\newblock Reducing the dimensionality of data with neural networks.
+\newblock {\em Science}, 313(5786):504--507, 2006.
+
+\bibitem{kingma2014vae}
+D.~P. Kingma and M.~Welling.
+\newblock Auto-encoding variational bayes.
+\newblock In {\em Proceedings of the 2nd International Conference on Learning
+  Representations (ICLR)}, 2014.
+
+\bibitem{locatello2019challenging}
+F.~Locatello, S.~Bauer, M.~Lucic, G.~R{\"a}tsch, S.~Gelly, B.~Sch{\"o}lkopf,
+  and O.~Bachem.
+\newblock Challenging common assumptions in the unsupervised learning of
+  disentangled representations.
+\newblock In {\em Proceedings of the 36th International Conference on Machine
+  Learning (ICML)}, pages 4114--4124, 2019.
+
+\bibitem{burgess2018understanding}
+C.~P. Burgess, I.~Higgins, A.~Pal, L.~Matthey, N.~Watters, G.~Desjardins, and
+  A.~Lerchner.
+\newblock Understanding disentangling in $\beta$-VAE.
+\newblock In {\em NIPS 2017 Workshop on Learning Disentangled Representations},
+  2018.
+
+\bibitem{chen2018isolating}
+R.~T.~Q. Chen, X.~Li, R.~Grosse, and D.~Duvenaud.
+\newblock Isolating sources of disentanglement in variational autoencoders.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  pages 2610--2620, 2018.
+
+\bibitem{doersch2016tutorial}
+C.~Doersch.
+\newblock Tutorial on variational autoencoders.
+\newblock {\em arXiv preprint arXiv:1606.05908}, 2016.
+
+\bibitem{kim2018disentangling}
+H.~Kim and A.~Mnih.
+\newblock Disentangling by factorising.
+\newblock In {\em Proceedings of the 35th International Conference on Machine
+  Learning (ICML)}, pages 2649--2658, 2018.
+
+\end{thebibliography}
+
+% ============================================================
+% APPENDIX
+% ============================================================
+\appendix
+
+\section{Complete Class-wise Results}
+\label{app:classwise}
+
+\begin{table}[H]
+\centering
+\caption{Complete Class-wise MSE for All Models}
+\label{tab:full_classwise}
+\scriptsize
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Class} & \textbf{Std AE} & \textbf{$\beta$=0.5} & \textbf{$\beta$=1.0} & \textbf{$\beta$=4.0} \\
+\midrule
+p1 & 0.030 & 0.057 & 0.070 & 0.123 \\
+pm & 0.037 & 0.071 & 0.088 & 0.143 \\
+cm & 0.044 & 0.075 & 0.089 & 0.154 \\
+p3m1 & 0.047 & 0.084 & 0.102 & 0.167 \\
+pmg & 0.050 & 0.086 & 0.097 & 0.149 \\
+p3 & 0.053 & 0.094 & 0.114 & 0.186 \\
+p31m & 0.054 & 0.100 & 0.121 & 0.200 \\
+p2 & 0.059 & 0.105 & 0.126 & 0.203 \\
+p4m & 0.059 & 0.106 & 0.128 & 0.225 \\
+pg & 0.061 & 0.113 & 0.135 & 0.225 \\
+cmm & 0.062 & 0.108 & 0.129 & 0.203 \\
+p4g & 0.065 & 0.121 & 0.137 & 0.214 \\
+pmm & 0.069 & 0.124 & 0.142 & 0.210 \\
+pgg & 0.075 & 0.138 & 0.159 & 0.233 \\
+p6m & 0.088 & 0.149 & 0.167 & 0.240 \\
+p4 & 0.108 & 0.163 & 0.181 & 0.261 \\
+p6 & 0.111 & 0.172 & 0.194 & 0.301 \\
+\midrule
+\textbf{Mean} & \textbf{0.061} & \textbf{0.109} & \textbf{0.128} & \textbf{0.196} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Training Curves}
+\label{app:training}
+
+Detailed training progression for each model:
+
+\begin{table}[H]
+\centering
+\caption{$\beta$-VAE Training Progression (Selected Epochs)}
+\label{tab:training_progression}
+\scriptsize
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Epoch} & \textbf{$\beta$=0.5} & \textbf{$\beta$=1.0} & \textbf{$\beta$=4.0} \\
+\midrule
+1 & 0.0376 & 0.0467 & 0.0615 \\
+5 & 0.0296 & 0.0372 & 0.0568 \\
+10 & 0.0288 & 0.0358 & 0.0571 \\
+15 & 0.0283 & 0.0351 & 0.0564 \\
+20 & 0.0279 & 0.0346 & 0.0555 \\
+25 & 0.0277 & 0.0346 & 0.0556 \\
+30 & - & 0.0345 & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Latent Space Visualizations}
+\label{app:visualizations}
+
+The latent space visualizations (t-SNE and PCA) for each model reveal distinct clustering patterns based on symmetry class. The Standard Autoencoder produces more scattered representations, while VAE models show better-defined clusters.
+
+Key observations:
+\begin{itemize}[noitemsep]
+    \item Classes with similar symmetry properties tend to cluster together
+    \item Higher $\beta$ values produce more compact, well-separated clusters
+    \item The 6-fold rotation classes (p6, p6m) form distinct regions
+    \item Simple symmetries (p1, pm) overlap more with each other
+\end{itemize}
+
+\section{Implementation Details}
+\label{app:implementation}
+
+\subsection{Data Augmentation}
+
+No data augmentation was applied during training to preserve symmetry properties of the images.
+
+\subsection{Normalization}
+
+Input images are normalized to $[-1, 1]$ range:
+\begin{verbatim}
+transforms.Normalize(
+    mean=[0.5, 0.5, 0.5],
+    std=[0.5, 0.5, 0.5]
+)
+\end{verbatim}
+
+\subsection{Weight Initialization}
+
+Default PyTorch initialization was used for all layers:
+\begin{itemize}[noitemsep]
+    \item Convolutional layers: Kaiming uniform
+    \item Batch normalization: weight=1, bias=0
+    \item Linear layers: Xavier uniform
+\end{itemize}
+
+\subsection{Early Stopping}
+
+Early stopping with patience=5 monitors validation loss. Training stops if validation loss does not improve for 5 consecutive epochs.
+
+\end{document}

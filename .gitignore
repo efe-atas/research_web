@@ -1,2 +1,10 @@
 .DS_store
 .idea
+*.pt
+*.pth
+*.ptl
+*.onnx
+*.ckpt
+*.torch
+*.pb
+*.ipynb

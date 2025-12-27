@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="Comprehensive Comparative Analysis of Autoencoder vs β-VAE for Wallpaper Symmetry Learning.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comparative Analysis — Wallpaper Symmetry Learning</title>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <link rel="icon" href="./static/images/favicon.svg">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+                <a class="navbar-item" href="index.html"><span class="icon"><i class="fas fa-home"></i></span></a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Experiments</a>
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="standard-ae.html">Standard Autoencoder</a>
+                        <a class="navbar-item" href="beta-05.html">β = 0.5</a>
+                        <a class="navbar-item" href="beta-10.html">β = 1.0</a>
+                        <a class="navbar-item" href="beta-40.html">β = 4.0</a>
+                        <a class="navbar-item is-active" href="comparison.html">Comparative Analysis</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" id="comparison">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <h2 class="title is-2" style="border-bottom: 3px solid #363636; padding-bottom: 10px;">
+                        Comprehensive Comparative Analysis
+                    </h2>
+
+                    <div class="content has-text-justified">
+                        <p>This section provides a complete comparison across all four model configurations,
+                            highlighting the fundamental trade-offs between <strong>deterministic vs
+                                probabilistic</strong> modeling and the effects of <strong>latent regularization
+                                strength</strong>.</p>
+                    </div>
+
+                    <h3 class="title is-4">Complete Performance Summary</h3>
+                    <div class="content">
+                        <table class="table is-striped is-fullwidth is-hoverable">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th style="background-color: #ede7f6;">Standard AE</th>
+                                    <th style="background-color: #ebfffc;">β = 0.5</th>
+                                    <th style="background-color: #effaf3;">β = 1.0</th>
+                                    <th style="background-color: #feecf0;">β = 4.0</th>
+                                    <th>Winner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Test MSE Loss</strong></td>
+                                    <td style="color: green;"><strong>0.061</strong></td>
+                                    <td>0.129</td>
+                                    <td>0.155</td>
+                                    <td style="color: red;">0.233</td>
+                                    <td>Standard AE</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Best Validation Loss</strong></td>
+                                    <td style="color: green;"><strong>0.009</strong></td>
+                                    <td>0.028</td>
+                                    <td>0.035</td>
+                                    <td style="color: red;">0.055</td>
+                                    <td>Standard AE</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>KL Divergence</strong></td>
+                                    <td>N/A</td>
+                                    <td style="color: red;">9.79</td>
+                                    <td>6.30</td>
+                                    <td style="color: green;"><strong>2.64</strong></td>
+                                    <td>β = 4.0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Latent Dimensions</strong></td>
+                                    <td>16,384</td>
+                                    <td colspan="3">64</td>
+                                    <td>VAEs (compact)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PCA Variance (2D)</strong></td>
+                                    <td>14.1%</td>
+                                    <td>60.93%</td>
+                                    <td style="color: green;"><strong>64.47%</strong></td>
+                                    <td>-</td>
+                                    <td>β = 1.0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>σ Mean (ideal: 1)</strong></td>
+                                    <td>N/A</td>
+                                    <td>0.855</td>
+                                    <td>0.904</td>
+                                    <td style="color: green;"><strong>0.963</strong></td>
+                                    <td>β = 4.0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Best Class MSE (p1)</strong></td>
+                                    <td style="color: green;"><strong>0.030</strong></td>
+                                    <td>0.057</td>
+                                    <td>0.070</td>
+                                    <td style="color: red;">0.123</td>
+                                    <td>Standard AE</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Worst Class MSE (p6)</strong></td>
+                                    <td style="color: green;"><strong>0.111</strong></td>
+                                    <td>0.172</td>
+                                    <td>0.194</td>
+                                    <td style="color: red;">0.301</td>
+                                    <td>Standard AE</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Training Time</strong></td>
+                                    <td style="color: green;"><strong>1h 8m</strong></td>
+                                    <td>2h 39m</td>
+                                    <td>2h 50m</td>
+                                    <td>2h 25m</td>
+                                    <td>Standard AE</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Generative Sampling</strong></td>
+                                    <td style="color: red;">Poor</td>
+                                    <td>Limited</td>
+                                    <td>Good</td>
+                                    <td style="color: green;"><strong>Best</strong></td>
+                                    <td>β = 4.0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="title is-4">Model Comparison Summary</h3>
+                    <div class="columns">
+                        <div class="column">
+                            <div class="box" style="border-left: 4px solid #7c4dff;">
+                                <h4 class="title is-5" style="color: #7c4dff;">Standard Autoencoder</h4>
+                                <ul>
+                                    <li><strong>Best for:</strong> Maximum reconstruction quality</li>
+                                    <li><strong>Pros:</strong> Lowest MSE, fastest training, sharpest details</li>
+                                    <li><strong>Cons:</strong> No generative capability, huge latent space</li>
+                                    <li><strong>Use case:</strong> Image compression, denoising</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="box" style="border-left: 4px solid #3273dc;">
+                                <h4 class="title is-5" style="color: #3273dc;">β = 0.5: VAE Reconstruction Focus</h4>
+                                <ul>
+                                    <li><strong>Best for:</strong> Balance between reconstruction & generation</li>
+                                    <li><strong>Pros:</strong> Best VAE reconstruction, compact latent</li>
+                                    <li><strong>Cons:</strong> Less regularized, limited sampling</li>
+                                    <li><strong>Use case:</strong> Semi-generative applications</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <div class="box" style="border-left: 4px solid #48c774;">
+                                <h4 class="title is-5" style="color: #48c774;">β = 1.0: Standard VAE</h4>
+                                <ul>
+                                    <li><strong>Best for:</strong> General-purpose representation learning</li>
+                                    <li><strong>Pros:</strong> Best PCA variance, theoretically grounded</li>
+                                    <li><strong>Cons:</strong> Moderate on all metrics</li>
+                                    <li><strong>Use case:</strong> Feature extraction, transfer learning</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="box" style="border-left: 4px solid #ff3860;">
+                                <h4 class="title is-5" style="color: #ff3860;">β = 4.0: Disentanglement Champion</h4>
+                                <ul>
+                                    <li><strong>Best for:</strong> Interpretable latent spaces, generation</li>
+                                    <li><strong>Pros:</strong> Best regularization, smooth latent traversals</li>
+                                    <li><strong>Cons:</strong> Blurry reconstructions, highest MSE</li>
+                                    <li><strong>Use case:</strong> Controllable generation, style transfer</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">The 17 Wallpaper Symmetry Groups</h3>
+                    <div class="content">
+                        <table class="table is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Difficulty</th>
+                                    <th>Classes</th>
+                                    <th>Characteristics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="color: green;"><strong>Easy</strong></td>
+                                    <td><code>p1</code>, <code>pm</code>, <code>cm</code></td>
+                                    <td>Simple translation and/or single mirror symmetry</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Moderate</strong></td>
+                                    <td><code>pmg</code>, <code>p3m1</code>, <code>p3</code>, <code>p31m</code>,
+                                        <code>p2</code>
+                                    </td>
+                                    <td>2-fold or 3-fold rotational symmetry</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Challenging</strong></td>
+                                    <td><code>p4m</code>, <code>cmm</code>, <code>pg</code>, <code>p4g</code>,
+                                        <code>pmm</code>
+                                    </td>
+                                    <td>4-fold symmetry or glide reflections</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: red;"><strong>Difficult</strong></td>
+                                    <td><code>pgg</code>, <code>p6m</code>, <code>p4</code>, <code>p6</code></td>
+                                    <td>6-fold symmetry or complex combined symmetries</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="title is-4">Practical Recommendations</h3>
+                    <div class="content">
+                        <div class="notification is-primary is-light">
+                            <h4>Choosing the Right Model</h4>
+                            <ol>
+                                <li><strong>For maximum reconstruction quality:</strong> Use Standard Autoencoder</li>
+                                <li><strong>For compact representations with good reconstruction:</strong> Use β-VAE
+                                    with β = 0.5</li>
+                                <li><strong>For feature learning and downstream classification:</strong> Use Standard
+                                    VAE (β = 1.0)</li>
+                                <li><strong>For interpretable latent spaces and generation:</strong> Use β-VAE with β ≥
+                                    4.0</li>
+                                <li><strong>For fast training and experimentation:</strong> Use Standard Autoencoder
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="theory">
+        <div class="container is-max-desktop content">
+            <h2 class="title">Understanding Autoencoders vs VAEs</h2>
+            <div class="content has-text-justified">
+                <h4>Standard Autoencoder</h4>
+                <p>A deterministic model that learns a compressed representation by minimizing reconstruction error:</p>
+                <div class="box">
+                    <p style="text-align: center; font-size: 1.2em;"><strong>L<sub>AE</sub> = ||x - D(E(x))||²</strong>
+                    </p>
+                </div>
+
+                <h4>Variational Autoencoder (VAE)</h4>
+                <p>A probabilistic model that learns a latent distribution regularized toward a prior:</p>
+                <div class="box">
+                    <p style="text-align: center; font-size: 1.2em;"><strong>L<sub>VAE</sub> = E<sub>q(z|x)</sub>[||x -
+                            D(z)||²] + KL(q(z|x) || N(0, I))</strong></p>
+                </div>
+
+                <h4>β-VAE</h4>
+                <p>Extends VAE with a hyperparameter β controlling the strength of latent regularization:</p>
+                <div class="box">
+                    <p style="text-align: center; font-size: 1.2em;"><strong>L<sub>β-VAE</sub> = E<sub>q(z|x)</sub>[||x
+                            - D(z)||²] + β · KL(q(z|x) || N(0, I))</strong></p>
+                </div>
+
+                <ul>
+                    <li><strong>β < 1:</strong> Prioritizes reconstruction over regularization</li>
+                    <li><strong>β = 1:</strong> Standard VAE (ELBO objective)</li>
+                    <li><strong>β > 1:</strong> Prioritizes disentanglement over reconstruction</li>
+                </ul>
+            </div>
+
+            <h2 class="title">Dataset</h2>
+            <div class="content has-text-justified">
+                <p>This research uses the <strong>Symmetry Dataset</strong> published on Zenodo.</p>
+                <div class="box">
+                    <p><strong>Dataset Citation:</strong></p>
+                    <p>Guo, Y., & Agar, J. (2022). <em>Symmetry_Dataset</em> [Data set]. Zenodo. <a
+                            href="https://doi.org/10.5281/zenodo.7384734"
+                            target="_blank">https://doi.org/10.5281/zenodo.7384734</a></p>
+                    <p><a href="https://zenodo.org/records/7384734" target="_blank"><img
+                                src="https://zenodo.org/badge/DOI/10.5281/zenodo.7384734.svg" alt="DOI"></a></p>
+                </div>
+            </div>
+
+            <h2 class="title">References</h2>
+            <pre><code>@dataset{guo_2022_7384734,
+  author    = {Guo, Yichen and Agar, Joshua},
+  title     = {Symmetry\_Dataset},
+  year      = {2022},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.7384734}
+}
+
+@article{higgins2017betavae,
+  title     = {β-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework},
+  author    = {Higgins, Irina and Matthey, Loic and Pal, Arka and others},
+  journal   = {ICLR},
+  year      = {2017},
+}
+
+@article{kingma2014vae,
+  title     = {Auto-Encoding Variational Bayes},
+  author    = {Kingma, Diederik P. and Welling, Max},
+  journal   = {ICLR},
+  year      = {2014},
+}</code></pre>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="./sources/standart_autoencoder/"><i class="fas fa-file-code"></i></a>
+                <a class="icon-link" href="#"><i class="fab fa-github"></i></a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+                        <p>Licensed under <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC
+                                BY-SA 4.0</a>. Template from <a
+                                href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

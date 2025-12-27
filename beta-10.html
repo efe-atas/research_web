@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="β-VAE with β=1.0 (Standard VAE) results for Wallpaper Symmetry Group Learning.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>β-VAE (β = 1.0) — Wallpaper Symmetry Learning</title>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <link rel="icon" href="./static/images/favicon.svg">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+</head>
+
+<body>
+
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+                <a class="navbar-item" href="index.html"><span class="icon"><i class="fas fa-home"></i></span></a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Experiments</a>
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="standard-ae.html">Standard Autoencoder</a>
+                        <a class="navbar-item" href="beta-05.html">β = 0.5</a>
+                        <a class="navbar-item is-active" href="beta-10.html">β = 1.0 (Standard VAE)</a>
+                        <a class="navbar-item" href="beta-40.html">β = 4.0</a>
+                        <a class="navbar-item" href="comparison.html">Comparative Analysis</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section" id="beta-10">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column is-full-width">
+                    <h2 class="title is-2" style="border-bottom: 3px solid #48c774; padding-bottom: 10px;">
+                        <span style="color: #48c774;">β-VAE (β = 1.0)</span> — Standard VAE (Balanced)
+                    </h2>
+
+                    <div class="content has-text-justified">
+                        <p>When β = 1, the model implements the <strong>standard Variational Autoencoder</strong>
+                            formulation as originally proposed by Kingma & Welling (2013).</p>
+                        <div class="notification is-success is-light">
+                            <strong>Key Insight:</strong> β = 1.0 achieves the <strong>highest PCA explained variance
+                                (64.47%)</strong> in just 2 dimensions.
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">Dataset Overview</h3>
+                    <div class="columns">
+                        <div class="column is-full">
+                            <img src="./sources/beta =1.0 (vae)/image.png" alt="Dataset β=1.0"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Sample images from the symmetry dataset - 17 wallpaper
+                                    groups</em></p>
+                        </div>
+                    </div>
+
+                    <h3 class="title is-4">Training Progress & Convergence</h3>
+                    <div class="content">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Epoch</th>
+                                    <th>Total Loss</th>
+                                    <th>Recon Loss</th>
+                                    <th>KL Loss</th>
+                                    <th>Val Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>0.070950</td>
+                                    <td>0.051767</td>
+                                    <td>0.019183</td>
+                                    <td>0.046682</td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>0.043059</td>
+                                    <td>0.030252</td>
+                                    <td>0.012807</td>
+                                    <td>0.035840</td>
+                                </tr>
+                                <tr>
+                                    <td>20</td>
+                                    <td>0.040939</td>
+                                    <td>0.028202</td>
+                                    <td>0.012737</td>
+                                    <td>0.034617</td>
+                                </tr>
+                                <tr>
+                                    <td>30 (Best)</td>
+                                    <td>0.040207</td>
+                                    <td>0.027504</td>
+                                    <td>0.012703</td>
+                                    <td><strong>0.034520</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="has-text-centered"><em>Training completed in 2 hours 49 minutes</em></p>
+                    </div>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 1.png" alt="Training"
+                                style="width: 100%; border-radius: 8px;"></div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 2.png" alt="Reconstruction"
+                                style="width: 100%; border-radius: 8px;"></div>
+                    </div>
+
+                    <h3 class="title is-4">Latent Space Analysis - PCA</h3>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 3.png" alt="PCA 1"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>PCA projection with class labels</em></p>
+                        </div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 4.png" alt="PCA 2"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Latent space density</em></p>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 5.png" alt="PCA 3"
+                                style="width: 100%; border-radius: 8px;"></div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 6.png" alt="PCA 4"
+                                style="width: 100%; border-radius: 8px;"></div>
+                    </div>
+
+                    <h3 class="title is-4">Latent Space Interpolation</h3>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 7.png" alt="Latent 1"
+                                style="width: 100%; border-radius: 8px;"></div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 8.png" alt="Latent 2"
+                                style="width: 100%; border-radius: 8px;"></div>
+                    </div>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 9.png" alt="Latent 3"
+                                style="width: 100%; border-radius: 8px;"></div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 10.png" alt="Latent 4"
+                                style="width: 100%; border-radius: 8px;"></div>
+                    </div>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 11.png" alt="Latent 5"
+                                style="width: 100%; border-radius: 8px;"></div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 12.png" alt="Latent 6"
+                                style="width: 100%; border-radius: 8px;"></div>
+                    </div>
+
+                    <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
+                    <div class="content">
+                        <p>Test VAE Loss: <strong>0.155442</strong></p>
+                    </div>
+                    <div class="columns">
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 13.png" alt="Class-wise 1"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Reconstruction error by class</em></p>
+                        </div>
+                        <div class="column"><img src="./sources/beta =1.0 (vae)/image 14.png" alt="Class-wise 2"
+                                style="width: 100%; border-radius: 8px;">
+                            <p class="has-text-centered"><em>Detailed error distribution</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="./sources/standart_autoencoder/"><i class="fas fa-file-code"></i></a>
+                <a class="icon-link" href="#"><i class="fab fa-github"></i></a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+                        <p>Licensed under <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC
+                                BY-SA 4.0</a>. Template from <a
+                                href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
