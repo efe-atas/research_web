@@ -103,7 +103,7 @@
                 <span class="author-block">
                   TED University<br>
                   Department of Computer Engineering<br>
-                  <a href="mailto:efeatas@itu.edu.tr">iefeatas@gmail.com</a>
+                  <a href="mailto:iefeatas@gmail.com">iefeatas@gmail.com</a>
                 </span>
               </span>
             </div>
@@ -309,11 +309,298 @@
     </div>
   </section>
 
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- ==================== EXPERIMENT LINKS SECTION ==================== -->
   <section class="section" style="background-color: #f5f5f5;">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Experiment Results</h2>
       <p class="has-text-centered mb-5">Click on any experiment to view detailed results and analysis.</p>
+
+      <!-- Performance Overview - Site Theme Style -->
+      <style>
+        .chart-container {
+          background: #ffffff;
+          border-radius: 12px;
+          padding: 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          border: 1px solid #e8e8e8;
+        }
+
+        .chart-title {
+          color: #363636;
+          font-size: 1.35rem;
+          font-weight: 600;
+          text-align: center;
+          margin-bottom: 1.75rem;
+        }
+
+        .chart-box {
+          background: #fafafa;
+          border-radius: 10px;
+          padding: 1.25rem;
+          border: 1px solid #eee;
+          height: 100%;
+        }
+
+        .chart-label {
+          color: #666;
+          font-size: 0.8rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          text-align: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .stat-card {
+          background: #fafafa;
+          border-radius: 10px;
+          padding: 1.25rem 1rem;
+          border: 1px solid #eee;
+          text-align: center;
+          transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+          border-color: #7c4dff;
+          background: #f5f5f5;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-label {
+          color: #888;
+          font-size: 0.7rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+          color: #363636;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-detail {
+          color: #888;
+          font-size: 0.75rem;
+        }
+      </style>
+
+      <div class="chart-container">
+        <h3 class="chart-title">Performance Overview</h3>
+
+        <div class="columns is-multiline">
+          <!-- Test MSE Chart -->
+          <div class="column is-half">
+            <div class="chart-box">
+              <p class="chart-label">Test MSE · Lower is Better</p>
+              <div style="position: relative; height: 200px;">
+                <canvas id="mseChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <!-- PCA Variance Chart -->
+          <div class="column is-half">
+            <div class="chart-box">
+              <p class="chart-label">PCA Variance (2D) · Higher is Better</p>
+              <div style="position: relative; height: 200px;">
+                <canvas id="pcaChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="columns" style="margin-top: 1.25rem;">
+          <div class="column">
+            <div class="stat-card">
+              <p class="stat-label">Best Reconstruction</p>
+              <p class="stat-value" style="color: #7c4dff;">Standard AE</p>
+              <p class="stat-detail">MSE: 0.061</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="stat-card">
+              <p class="stat-label">Best Regularization</p>
+              <p class="stat-value" style="color: #ff3860;">β = 4.0</p>
+              <p class="stat-detail">KL: 2.64</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="stat-card">
+              <p class="stat-label">Best Inpainting</p>
+              <p class="stat-value" style="color: #ff6b35;">Masked AE</p>
+              <p class="stat-detail">MSE: 0.066</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="stat-card">
+              <p class="stat-label">Best Compactness</p>
+              <p class="stat-value" style="color: #48c774;">β = 1.0</p>
+              <p class="stat-detail">PCA: 64.47%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // Site theme chart configuration
+        Chart.defaults.font.family = "'Google Sans', 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif";
+
+        const siteColors = {
+          // Experiment card colors matching the site theme
+          bars: [
+            '#7c4dff',  // Standard AE - mor
+            '#ff6b35',  // Masked AE - turuncu
+            '#3273dc',  // β=0.5 - mavi
+            '#48c774',  // β=1.0 - yeşil
+            '#ff3860'   // β=4.0 - kırmızı
+          ],
+          grid: 'rgba(0, 0, 0, 0.06)',
+          text: '#666',
+          textLight: '#888'
+        };
+
+        // MSE Chart
+        const mseCtx = document.getElementById('mseChart').getContext('2d');
+        new Chart(mseCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Standard AE', 'Masked AE', 'β=0.5', 'β=1.0', 'β=4.0'],
+            datasets: [{
+              label: 'Test MSE',
+              data: [0.061, 0.066, 0.129, 0.155, 0.233],
+              backgroundColor: siteColors.bars,
+              borderColor: 'transparent',
+              borderWidth: 0,
+              borderRadius: 4,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#fff',
+                titleColor: '#363636',
+                bodyColor: '#666',
+                borderColor: '#e8e8e8',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                  label: function (context) {
+                    return 'MSE: ' + context.raw.toFixed(3);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 0.26,
+                ticks: {
+                  color: siteColors.textLight,
+                  font: { size: 10 },
+                  padding: 8
+                },
+                grid: {
+                  color: siteColors.grid,
+                  drawBorder: false
+                },
+                border: { display: false }
+              },
+              x: {
+                ticks: {
+                  color: siteColors.text,
+                  font: { size: 10 },
+                  padding: 4
+                },
+                grid: { display: false },
+                border: { display: false }
+              }
+            }
+          }
+        });
+
+        // PCA Variance Chart
+        const pcaCtx = document.getElementById('pcaChart').getContext('2d');
+        new Chart(pcaCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Standard AE', 'Masked AE', 'β=0.5', 'β=1.0', 'β=4.0'],
+            datasets: [{
+              label: 'PCA Variance (%)',
+              data: [14.7, 21.6, 54.43, 64.47, 51.79],
+              backgroundColor: siteColors.bars,
+              borderColor: 'transparent',
+              borderWidth: 0,
+              borderRadius: 4,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#fff',
+                titleColor: '#363636',
+                bodyColor: '#666',
+                borderColor: '#e8e8e8',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                  label: function (context) {
+                    return 'PCA Variance: ' + context.raw.toFixed(2) + '%';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 75,
+                ticks: {
+                  color: siteColors.textLight,
+                  font: { size: 10 },
+                  padding: 8,
+                  callback: function (value) {
+                    return value + '%';
+                  }
+                },
+                grid: {
+                  color: siteColors.grid,
+                  drawBorder: false
+                },
+                border: { display: false }
+              },
+              x: {
+                ticks: {
+                  color: siteColors.text,
+                  font: { size: 10 },
+                  padding: 4
+                },
+                grid: { display: false },
+                border: { display: false }
+              }
+            }
+          }
+        });
+      </script>
 
       <div class="columns is-multiline">
         <div class="column is-half">
@@ -332,7 +619,7 @@
             <h4 class="title is-5" style="color: #ff6b35;">Masked Autoencoder</h4>
             <p><strong>Inpainting with 25% Masking</strong></p>
             <ul>
-              <li>Test MSE: <strong>0.142</strong> (masked)</li>
+              <li>Test MSE: <strong>0.066</strong> (masked)</li>
               <li>Training Time: 1h 26min</li>
               <li>Self-supervised learning</li>
             </ul>

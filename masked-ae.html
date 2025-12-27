@@ -96,7 +96,7 @@
                             <strong>Key Insight:</strong> This approach tests whether the autoencoder truly understands
                             the symmetry structure of wallpaper groups by evaluating its ability to <strong>complete
                                 masked regions</strong> consistently with the underlying pattern. Training time was
-                            <strong>1h 26min</strong> with a Test MSE (Masked Inpainting) of <strong>0.1417</strong>.
+                            <strong>1h 26min</strong> with a Test MSE (Masked Inpainting) of <strong>0.0659</strong>.
                         </div>
                     </div>
 
@@ -247,23 +247,23 @@ Masking Strategy: Random 25% of image pixels masked during training</code></pre>
                                     </tr>
                                     <tr>
                                         <td>Mean Error</td>
-                                        <td>0.141286</td>
+                                        <td>0.066</td>
                                     </tr>
                                     <tr>
                                         <td>Std Error</td>
-                                        <td>0.086179</td>
+                                        <td>0.06</td>
                                     </tr>
                                     <tr>
                                         <td>Min Error</td>
-                                        <td>0.013387</td>
+                                        <td>0.034 (p1)</td>
                                     </tr>
                                     <tr>
                                         <td>Max Error</td>
-                                        <td>0.607895</td>
+                                        <td>0.118 (p6)</td>
                                     </tr>
                                     <tr>
-                                        <td>Median Error</td>
-                                        <td>0.118456</td>
+                                        <td>Test MSE</td>
+                                        <td><strong>0.0659</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -346,7 +346,7 @@ Masking Strategy: Random 25% of image pixels masked during training</code></pre>
                     <h3 class="title is-4">Class-wise Reconstruction Performance</h3>
                     <div class="content has-text-justified">
                         <p>
-                            Test MSE Loss (Masked Inpainting): <strong>0.141689</strong> — Higher than standard
+                            Test MSE Loss (Masked Inpainting): <strong>0.0659</strong> — Slightly higher than standard
                             reconstruction due to the challenge of inpainting masked regions. The class-wise analysis
                             shows simpler symmetries (p1, pm) are easier to inpaint correctly.
                         </p>
@@ -366,120 +366,120 @@ Masking Strategy: Random 25% of image pixels masked during training</code></pre>
                                 <tr>
                                     <td>1</td>
                                     <td>p1</td>
-                                    <td><strong>0.095938</strong></td>
-                                    <td>±0.039598</td>
+                                    <td><strong>0.033877</strong></td>
+                                    <td>±0.029891</td>
                                     <td style="color: green;">Best</td>
                                 </tr>
                                 <tr>
                                     <td>2</td>
                                     <td>pm</td>
-                                    <td>0.102631</td>
-                                    <td>±0.051328</td>
+                                    <td>0.041179</td>
+                                    <td>±0.034233</td>
                                     <td style="color: green;">Excellent</td>
                                 </tr>
                                 <tr>
                                     <td>3</td>
-                                    <td>pmg</td>
-                                    <td>0.120116</td>
-                                    <td>±0.050504</td>
+                                    <td>cm</td>
+                                    <td>0.047622</td>
+                                    <td>±0.038020</td>
                                     <td style="color: green;">Excellent</td>
                                 </tr>
                                 <tr>
                                     <td>4</td>
-                                    <td>cm</td>
-                                    <td>0.120755</td>
-                                    <td>±0.054365</td>
+                                    <td>p3m1</td>
+                                    <td>0.049538</td>
+                                    <td>±0.039734</td>
                                     <td style="color: green;">Excellent</td>
                                 </tr>
                                 <tr>
                                     <td>5</td>
-                                    <td>p3m1</td>
-                                    <td>0.126557</td>
-                                    <td>±0.055458</td>
+                                    <td>pmg</td>
+                                    <td>0.054193</td>
+                                    <td>±0.041449</td>
                                     <td>Good</td>
                                 </tr>
                                 <tr>
                                     <td>6</td>
                                     <td>p3</td>
-                                    <td>0.130303</td>
-                                    <td>±0.065702</td>
+                                    <td>0.057908</td>
+                                    <td>±0.047727</td>
                                     <td>Good</td>
                                 </tr>
                                 <tr>
                                     <td>7</td>
                                     <td>p31m</td>
-                                    <td>0.137865</td>
-                                    <td>±0.061311</td>
+                                    <td>0.058632</td>
+                                    <td>±0.037403</td>
                                     <td>Good</td>
                                 </tr>
                                 <tr>
                                     <td>8</td>
-                                    <td>p2</td>
-                                    <td>0.141738</td>
-                                    <td>±0.091288</td>
+                                    <td>p4m</td>
+                                    <td>0.063517</td>
+                                    <td>±0.035886</td>
                                     <td>Good</td>
                                 </tr>
                                 <tr>
                                     <td>9</td>
-                                    <td>pg</td>
-                                    <td>0.144643</td>
-                                    <td>±0.083859</td>
+                                    <td>p2</td>
+                                    <td>0.063687</td>
+                                    <td>±0.061649</td>
                                     <td>Average</td>
                                 </tr>
                                 <tr>
                                     <td>10</td>
-                                    <td>pmm</td>
-                                    <td>0.147325</td>
-                                    <td>±0.083088</td>
+                                    <td>pg</td>
+                                    <td>0.066616</td>
+                                    <td>±0.064319</td>
                                     <td>Average</td>
                                 </tr>
                                 <tr>
                                     <td>11</td>
-                                    <td>pgg</td>
-                                    <td>0.147540</td>
-                                    <td>±0.116432</td>
+                                    <td>cmm</td>
+                                    <td>0.068138</td>
+                                    <td>±0.080336</td>
                                     <td>Average</td>
                                 </tr>
                                 <tr>
                                     <td>12</td>
                                     <td>p4g</td>
-                                    <td>0.150296</td>
-                                    <td>±0.055026</td>
+                                    <td>0.072085</td>
+                                    <td>±0.056724</td>
                                     <td>Average</td>
                                 </tr>
                                 <tr>
                                     <td>13</td>
-                                    <td>cmm</td>
-                                    <td>0.154214</td>
-                                    <td>±0.093846</td>
+                                    <td>pmm</td>
+                                    <td>0.074614</td>
+                                    <td>±0.057311</td>
                                     <td>Below Average</td>
                                 </tr>
                                 <tr>
                                     <td>14</td>
-                                    <td>p4m</td>
-                                    <td>0.159313</td>
-                                    <td>±0.060077</td>
+                                    <td>pgg</td>
+                                    <td>0.080547</td>
+                                    <td>±0.083709</td>
                                     <td>Below Average</td>
                                 </tr>
                                 <tr>
                                     <td>15</td>
                                     <td>p6m</td>
-                                    <td>0.170557</td>
-                                    <td>±0.090561</td>
+                                    <td>0.094967</td>
+                                    <td>±0.081291</td>
                                     <td>Below Average</td>
                                 </tr>
                                 <tr>
                                     <td>16</td>
                                     <td>p4</td>
-                                    <td>0.185476</td>
-                                    <td>±0.143337</td>
+                                    <td>0.113011</td>
+                                    <td>±0.128241</td>
                                     <td style="color: orange;">Difficult</td>
                                 </tr>
                                 <tr>
                                     <td>17</td>
                                     <td>p6</td>
-                                    <td>0.210967</td>
-                                    <td>±0.108528</td>
+                                    <td>0.118340</td>
+                                    <td>±0.103816</td>
                                     <td style="color: red;">Worst</td>
                                 </tr>
                             </tbody>
@@ -489,8 +489,8 @@ Masking Strategy: Random 25% of image pixels masked during training</code></pre>
                     <div class="notification is-info is-light">
                         <strong>Observation:</strong> The masked autoencoder shows similar performance ranking to the
                         standard autoencoder, with simpler symmetries (p1, pm) being easier to reconstruct. However,
-                        the overall MSE is higher (~0.14 vs ~0.06) due to the additional challenge of inferring masked
-                        regions. Complex rotational symmetries (p4, p6) remain the most challenging for inpainting.
+                        the overall Test MSE is 0.0659, only slightly higher than standard AE (0.061). Complex
+                        rotational symmetries (p4, p6) remain the most challenging for inpainting.
                     </div>
 
                 </div>
